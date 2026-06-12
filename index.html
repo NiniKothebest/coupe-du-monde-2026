@@ -260,6 +260,64 @@
       #groups-select-wrap { display: none !important; }
       nav .group-nav-btn { display: inline-block; }
     }
+
+    /* ── PRONOSTICS ── */
+    .prono-badge   { font-size:0.6rem; font-weight:700; padding:0.1rem 0.4rem; border-radius:0.25rem; white-space:nowrap; }
+    .badge-exact   { background:rgba(63,185,80,0.2);  color:var(--green); }
+    .badge-result  { background:rgba(240,192,64,0.2); color:var(--gold); }
+    .badge-miss    { background:rgba(233,69,96,0.2);  color:var(--accent); }
+    .badge-pending { background:rgba(88,166,255,0.15); color:var(--blue); }
+
+    /* Ligne inline dans le calendrier de groupe */
+    .inline-prono  { display:flex; align-items:center; flex-wrap:wrap; gap:0.3rem; font-size:0.62rem; color:var(--muted); padding:0.2rem 0 0; }
+    .prono-score-badge { background:rgba(233,69,96,0.15); color:var(--accent); padding:0.1rem 0.35rem; border-radius:0.25rem; font-weight:700; font-size:0.68rem; }
+
+    /* Carte de prédiction complète */
+    .prono-card { background:rgba(255,255,255,0.025); border:1px solid var(--border); border-radius:0.6rem; padding:0.9rem; margin-top:0.6rem; }
+    .prono-card-collapsed { display:none; }
+    .prono-best-score { font-size:1.6rem; font-weight:900; text-align:center; letter-spacing:0.04em; line-height:1; }
+    .prono-best-sub { font-size:0.6rem; color:var(--muted); text-align:center; margin:0.2rem 0 0.85rem; }
+    .prono-section-hd { font-size:0.58rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; font-weight:700; margin-bottom:0.4rem; }
+
+    /* Top 5 */
+    .top5-row  { display:flex; align-items:center; gap:0.35rem; margin-bottom:0.25rem; }
+    .top5-lbl  { font-size:0.72rem; font-weight:700; min-width:2.4rem; }
+    .top5-bar  { flex:1; height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
+    .top5-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--gold)); border-radius:2px; }
+    .top5-pct  { font-size:0.62rem; color:var(--muted); min-width:2.8rem; text-align:right; }
+    .top5-row.is-actual .top5-lbl { color:var(--green); }
+    .top5-row.is-actual .top5-fill { background:var(--green); }
+
+    /* Heatmap */
+    .heatmap-outer { overflow-x:auto; }
+    .heatmap-tbl   { border-collapse:collapse; font-size:0.58rem; width:100%; min-width:200px; }
+    .heatmap-tbl th { padding:0.25rem 0.3rem; color:var(--muted); font-weight:600; text-align:center; font-size:0.58rem; background:var(--bg); }
+    .heatmap-tbl td { padding:0.25rem 0.3rem; text-align:center; border:1px solid rgba(255,255,255,0.03); min-width:2.5rem; transition:opacity 0.2s; }
+    .heatmap-tbl td:hover { opacity:0.8; }
+    .heatmap-tbl td.actual-score { outline:2px solid var(--green); outline-offset:-2px; }
+
+    /* Stats V/N/D + O/U */
+    .prono-stats { display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:0.7rem; }
+    .prono-stat-box { flex:1; min-width:70px; text-align:center; background:var(--card); border:1px solid var(--border); border-radius:0.4rem; padding:0.45rem 0.3rem; }
+    .prono-stat-box .pst-val { font-size:1rem; font-weight:800; }
+    .prono-stat-box .pst-lbl { font-size:0.58rem; color:var(--muted); margin-top:0.1rem; }
+
+    /* Carte de performance */
+    .perf-card { background:linear-gradient(135deg,rgba(88,166,255,0.07),rgba(63,185,80,0.07)); border:1px solid rgba(88,166,255,0.2); border-radius:0.75rem; padding:1rem; margin-bottom:1.25rem; }
+    .perf-title { font-size:0.7rem; font-weight:700; color:var(--blue); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.75rem; }
+    .perf-grid  { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:0.6rem; }
+    .perf-item  { text-align:center; background:var(--card); border:1px solid var(--border); border-radius:0.5rem; padding:0.55rem 0.3rem; }
+    .perf-item .pi-val { font-size:1.15rem; font-weight:800; }
+    .perf-item .pi-lbl { font-size:0.58rem; color:var(--muted); }
+    .perf-item .pi-vs  { font-size:0.6rem; font-weight:600; margin-top:0.1rem; }
+
+    /* Liste Pronostics */
+    .prono-match-hd { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.4rem; margin-bottom:0.5rem; }
+    .prono-match-teams { font-weight:600; font-size:0.82rem; display:flex; align-items:center; gap:0.4rem; }
+    .prono-toggle  { background:none; border:none; color:var(--muted); cursor:pointer; font-size:0.7rem; padding:0.1rem 0.3rem; }
+    .prono-toggle:hover { color:var(--text); }
+    .date-separator { font-size:0.68rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; padding:0.4rem 0 0.2rem; border-bottom:1px solid var(--border); margin-bottom:0.5rem; }
+    .prono-lambda { font-size:0.6rem; color:var(--muted); }
   </style>
 </head>
 <body>
@@ -277,7 +335,8 @@
 
 <nav id="main-nav">
   <button onclick="showTab('apercu')" class="active" data-tab="apercu">Vue d'ensemble</button>
-  <button onclick="showTab('bracket')" data-tab="bracket">Tableau final</button>
+  <button onclick="showTab('bracket')"    data-tab="bracket">Tableau final</button>
+  <button onclick="showTab('pronostics')" data-tab="pronostics">Pronostics</button>
   <!-- Les onglets groupes sont injectés dynamiquement (classe group-nav-btn) -->
   <button onclick="showTab('elo')" data-tab="elo">Classement Élo</button>
 </nav>
@@ -305,11 +364,14 @@
     </div>
 
     <div class="sim-bar">
-      <button class="btn-sim" id="btn-sim" onclick="lancerSimulation()">
+      <button class="btn-sim" id="btn-sim" onclick="lancerSimulation()" style="display:none">
         ▶ Simuler (100 000 itérations)
       </button>
+      <button class="btn btn-ghost" id="btn-recalc" onclick="forcerRecalcul()"
+              title="Forcer une nouvelle simulation (ignore le cache)"
+              style="font-size:0.75rem;display:none">🔄 Recalculer</button>
       <div class="progress-bar" id="progress-bar" style="display:none"><div class="progress-fill" id="progress-fill"></div></div>
-      <span class="sim-info" id="sim-status">Cliquez pour lancer la simulation Monte Carlo</span>
+      <span class="sim-info" id="sim-status">Initialisation…</span>
     </div>
 
     <div class="grid2">
@@ -376,6 +438,18 @@
   <!-- ══════════════════════════════════════════
        ONGLETS GROUPES (injectés dynamiquement)
   ══════════════════════════════════════════ -->
+
+  <!-- ══════════════════════════════════════════
+       ONGLET : PRONOSTICS
+  ══════════════════════════════════════════ -->
+  <div id="panel-pronostics" class="tab-panel">
+    <!-- Indicateur de performance du modèle -->
+    <div id="prono-perf" style="display:none"></div>
+    <!-- Liste de tous les matchs avec pronostics -->
+    <div id="pronostics-content">
+      <div class="empty"><div class="empty-icon">🎯</div>Lancez la simulation pour générer les pronostics</div>
+    </div>
+  </div>
 
   <!-- ══════════════════════════════════════════
        ONGLET : CLASSEMENT ÉLO
@@ -768,6 +842,13 @@ const BRACKET_R32 = [
 let resultats = {};
 let eloActuel = {};  // Élo courants, mis à jour après chaque résultat réel
 
+// ── Variables du modèle Double Poisson (déclarées tôt pour éviter le TDZ) ──
+let attackDef = {};     // forces att/def par équipe
+const DC_RHO   = 0.10;  // correction Dixon-Coles
+const MU_GOALS = 1.35;  // buts moyens par équipe par match en CdM
+const MAX_G    = 6;     // max buts modélisés dans la matrice
+const HMAP     = 4;     // taille heatmap affichée (0..HMAP)
+
 function chargerResultats() {
   try { resultats = JSON.parse(localStorage.getItem('cdm2026_v2') || '{}'); }
   catch(e) { resultats = {}; }
@@ -786,6 +867,8 @@ function recalculerEloActuel() {
     const r = resultats[m.id];
     _majElo(m.e1, m.e2, r.g1, r.g2);
   }
+  // Recalcul simultané des forces att/def (modèle Double Poisson)
+  recalculerAttackDef();
 }
 
 /**
@@ -804,7 +887,7 @@ function _majElo(n1, n2, g1, g2) {
 }
 
 chargerResultats();
-recalculerEloActuel();
+recalculerEloActuel();  // initialise aussi attackDef via recalculerAttackDef()
 
 /** Élo effectif : Élo courant + bonus domicile si nation hôte. */
 function effElo(nom) {
@@ -814,6 +897,49 @@ function effElo(nom) {
 
 let statsSimulation = null;
 let activeWorker    = null;
+
+// ── Cache de simulation (localStorage) ─────────────────────────────
+
+/** Empreinte de l'état courant (résultats saisis) pour valider le cache. */
+function hashEtatActuel() {
+  return JSON.stringify(resultats);
+}
+
+function sauvegarderCacheSim(stats) {
+  try {
+    localStorage.setItem('cdm2026_cache_sim', JSON.stringify({
+      probs: stats, hash: hashEtatActuel(), N: 100000,
+    }));
+  } catch(e) {}  // ignore les erreurs de quota
+}
+
+function chargerCacheSim() {
+  try {
+    const raw = localStorage.getItem('cdm2026_cache_sim');
+    if (!raw) return null;
+    const c = JSON.parse(raw);
+    if (c.hash === hashEtatActuel() && c.N === 100000) return c.probs;
+  } catch(e) {}
+  return null;
+}
+
+function invaliderCacheSim() {
+  localStorage.removeItem('cdm2026_cache_sim');
+}
+
+// ── Factorisation de l'affichage des stats ──────────────────────────
+
+function afficherDepuisStats(stats) {
+  statsSimulation = stats;
+  afficherTableauVictoire(stats);
+  afficherTableauStades(stats);
+  afficherGraphique(stats);
+  afficherBracket(stats);
+  afficherChartHistorique();
+  afficherPronostics();
+  for (const L of 'ABCDEFGHIJKL'.split('')) afficherProbsGroupe(L, stats);
+  remplirTableauElo();
+}
 
 // ════════════════════════════════════════════════════════════════════
 // 5. UTILITAIRES
@@ -938,7 +1064,11 @@ function simulerTournoi(eqs, matchsG, res, eloMap, brkt, hotes, bonusDom) {
 // 7. SIMULATION MONTE CARLO — WEB WORKER (100 000 itérations)
 // ════════════════════════════════════════════════════════════════════
 
-function lancerSimulation() {
+/**
+ * Lance (ou récupère depuis le cache) la simulation Monte Carlo.
+ * @param {boolean} forcer - Si true, ignore le cache et recalcule.
+ */
+function lancerSimulation(forcer = false) {
   if (activeWorker) { activeWorker.terminate(); activeWorker = null; }
 
   const btn  = document.getElementById('btn-sim');
@@ -946,63 +1076,65 @@ function lancerSimulation() {
   const bar  = document.getElementById('progress-bar');
   const fill = document.getElementById('progress-fill');
 
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Simulation en cours…';
-  if (bar)  bar.style.display  = 'block';
-  if (fill) fill.style.width   = '0%';
-  stat.textContent = 'Démarrage…';
+  // ── Essayer le cache en priorité (sauf si forcé) ──
+  if (!forcer) {
+    const cached = chargerCacheSim();
+    if (cached) {
+      afficherDepuisStats(cached);
+      const nbRes = Object.keys(resultats).length;
+      if (stat) stat.textContent = `📦 Cache · ${nbRes} résultat${nbRes>1?'s':''} · cliquez 🔄 pour recalculer`;
+      document.getElementById('header-sim-state').textContent = '📦 Cache';
+      const bR = document.getElementById('btn-recalc');
+      if (bR) bR.style.display = 'inline-flex';
+      return;
+    }
+  }
+
+  // ── Lancer le Worker (100 000 itérations) ──
+  if (btn)  { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Simulation en cours…'; }
+  if (bar)  bar.style.display = 'block';
+  if (fill) fill.style.width  = '0%';
+  if (stat) stat.textContent  = 'Démarrage…';
 
   const N     = 100000;
   const debut = performance.now();
 
-  // Créer le Worker depuis le <script id="worker-src">
   const src  = document.getElementById('worker-src').textContent;
   const blob = new Blob([src], { type: 'application/javascript' });
   const url  = URL.createObjectURL(blob);
   activeWorker = new Worker(url);
 
   activeWorker.postMessage({
-    equipes:      EQUIPES,
-    matchsGroupes: MATCHS_GROUPES,
-    resultats,
-    eloActuel:    { ...eloActuel },
-    bracketR32:   BRACKET_R32,
-    nationsHotes: [...NATIONS_HOTES],
-    bonusDomicile: BONUS_DOMICILE,
-    N,
-    batchSize: 5000,
+    equipes: EQUIPES, matchsGroupes: MATCHS_GROUPES, resultats,
+    eloActuel: { ...eloActuel }, bracketR32: BRACKET_R32,
+    nationsHotes: [...NATIONS_HOTES], bonusDomicile: BONUS_DOMICILE,
+    N, batchSize: 5000,
   });
 
   activeWorker.onmessage = ev => {
     if (ev.data.type === 'progress') {
       const pct = Math.round(ev.data.done / N * 100);
       if (fill) fill.style.width = pct + '%';
-      stat.textContent = `${ev.data.done.toLocaleString('fr-FR')} / ${N.toLocaleString('fr-FR')}…`;
+      if (stat) stat.textContent = `${ev.data.done.toLocaleString('fr-FR')} / ${N.toLocaleString('fr-FR')}…`;
     } else if (ev.data.type === 'result') {
       const duree = ((performance.now() - debut) / 1000).toFixed(1);
       const nbRes = Object.keys(resultats).length;
-      statsSimulation = ev.data.probs;
-      afficherTableauVictoire(statsSimulation);
-      afficherTableauStades(statsSimulation);
-      afficherGraphique(statsSimulation);
-      afficherBracket(statsSimulation);
-      afficherChartHistorique();
-      for (const L of 'ABCDEFGHIJKL'.split('')) afficherProbsGroupe(L, statsSimulation);
-      remplirTableauElo();
-      // Sauvegarder un snapshot si des résultats réels ont été saisis
-      if (nbRes > 0) sauvegarderSnapshot(statsSimulation);
-      stat.textContent = `100 000 simulations en ${duree}s — ${nbRes} résultat${nbRes>1?'s':''} connu${nbRes>1?'s':''}`;
+      afficherDepuisStats(ev.data.probs);
+      sauvegarderCacheSim(ev.data.probs);           // 📦 Mise en cache
+      if (nbRes > 0) sauvegarderSnapshot(ev.data.probs);  // historique
+      if (stat) stat.textContent = `100 000 simulations en ${duree}s — ${nbRes} résultat${nbRes>1?'s':''} connu${nbRes>1?'s':''}`;
       document.getElementById('header-sim-state').textContent = `✓ ${duree}s`;
-      btn.disabled = false;
-      btn.innerHTML = '↺ Relancer la simulation';
-      if (bar) bar.style.display = 'none';
+      if (btn)  { btn.disabled = false; }
+      if (bar)  bar.style.display = 'none';
+      const bR = document.getElementById('btn-recalc');
+      if (bR) bR.style.display = 'inline-flex';
       activeWorker.terminate(); URL.revokeObjectURL(url); activeWorker = null;
     }
   };
 
   activeWorker.onerror = () => {
-    // Fallback synchrone si le Worker échoue (ex: CSP bloquant les blob URLs)
-    stat.textContent = 'Worker bloqué — simulation synchrone (10 000 it.)…';
+    // Fallback synchrone (10 000 it.) si blob URL bloqué par la CSP
+    if (stat) stat.textContent = 'Worker bloqué — simulation synchrone (10 000 it.)…';
     setTimeout(() => {
       const c = {};
       for (const n of Object.keys(EQUIPES)) c[n]={r32:0,r16:0,qf:0,sf:0,finale:0,vainqueur:0};
@@ -1014,17 +1146,22 @@ function lancerSimulation() {
       }
       const probs={};
       for(const [n,v] of Object.entries(c))
-        probs[n]={r32:v.r32/10000,r16:v.r16/10000,qf:v.qf/10000,sf:v.sf/10000,finale:v.finale/10000,vainqueur:v.vainqueur/10000};
-      statsSimulation=probs;
-      statsSimulation = probs;
-      afficherTableauVictoire(probs); afficherTableauStades(probs); afficherGraphique(probs);
-      afficherBracket(probs); afficherChartHistorique();
-      for(const L of 'ABCDEFGHIJKL'.split('')) afficherProbsGroupe(L,probs);
-      remplirTableauElo();
-      btn.disabled=false; btn.innerHTML='↺ Relancer la simulation';
-      if(bar) bar.style.display='none';
+        probs[n]={r32:v.r32/10000,r16:v.r16/10000,qf:v.qf/10000,
+                  sf:v.sf/10000,finale:v.finale/10000,vainqueur:v.vainqueur/10000};
+      afficherDepuisStats(probs);
+      sauvegarderCacheSim(probs);
+      if (btn) btn.disabled = false;
+      if (bar) bar.style.display = 'none';
+      const bR2 = document.getElementById('btn-recalc');
+      if (bR2) bR2.style.display = 'inline-flex';
     }, 50);
   };
+}
+
+/** Force une nouvelle simulation en ignorant le cache. */
+function forcerRecalcul() {
+  invaliderCacheSim();
+  lancerSimulation(true);
 }
 
 // ════════════════════════════════════════════════════════════════════
@@ -1099,15 +1236,19 @@ function genererGroupeHTML(L) {
       const pr = probsElo(elo1, elo2);
       const h1 = NATIONS_HOTES.has(m.e1) ? ' 🏠' : '';
       const h2 = NATIONS_HOTES.has(m.e2) ? '🏠 ' : '';
-      return `<div class="match-row">
-        <div class="match-team">${drapeau(eq1.code)} <span>${m.e1}${h1}</span></div>
-        <div class="match-center">
-          <div class="score-box ${jouee?'played':''}" onclick="ouvrirModal('${m.id}')"
-               title="Cliquer pour saisir le résultat">${scoreStr}</div>
-          <div class="match-date">${formatDate(m.date)}</div>
-          <div class="match-proba">${(pr.vic*100).toFixed(0)}%&nbsp;·&nbsp;${(pr.nul*100).toFixed(0)}%&nbsp;·&nbsp;${(pr.def*100).toFixed(0)}%</div>
+      const pronoHTML = renderPronoCompact(m);
+      return `<div style="border-bottom:1px solid rgba(255,255,255,0.04);padding-bottom:0.4rem;margin-bottom:0.2rem">
+        <div class="match-row" style="border-bottom:none">
+          <div class="match-team">${drapeau(eq1.code)} <span>${m.e1}${h1}</span></div>
+          <div class="match-center">
+            <div class="score-box ${jouee?'played':''}" onclick="ouvrirModal('${m.id}')"
+                 title="Cliquer pour saisir le résultat">${scoreStr}</div>
+            <div class="match-date">${formatDate(m.date)}</div>
+            <div class="match-proba">${(pr.vic*100).toFixed(0)}%&nbsp;·&nbsp;${(pr.nul*100).toFixed(0)}%&nbsp;·&nbsp;${(pr.def*100).toFixed(0)}%</div>
+          </div>
+          <div class="match-team right"><span>${h2}${m.e2}</span> ${drapeau(eq2.code)}</div>
         </div>
-        <div class="match-team right"><span>${h2}${m.e2}</span> ${drapeau(eq2.code)}</div>
+        ${pronoHTML}
       </div>`;
     }).join('');
     return `<div style="margin-bottom:0.5rem">
@@ -1193,8 +1334,9 @@ function validerResultat() {
   const g2=Math.max(0,parseInt(document.getElementById('modal-g2').value)||0);
   resultats[modalMatchId]={g1,g2};
   sauvegarderResultats();
-  recalculerEloActuel();
-  actualiserAffichage();  // relance simulation → snapshot sauvegardé dans le callback
+  recalculerEloActuel();   // met à jour Élo + attackDef
+  invaliderCacheSim();     // le cache est obsolète dès qu'un résultat change
+  actualiserAffichage();
   fermerModal();
 }
 
@@ -1203,6 +1345,7 @@ function effacerResultat() {
   delete resultats[modalMatchId];
   sauvegarderResultats();
   recalculerEloActuel();
+  invaliderCacheSim();
   actualiserAffichage();
   fermerModal();
 }
@@ -1214,7 +1357,8 @@ function actualiserAffichage() {
     if(statsSimulation) afficherProbsGroupe(L, statsSimulation);
   }
   afficherMatchsDuJour();
-  lancerSimulation();  // relance avec les nouveaux Élo → snapshot sauvé dans le callback
+  afficherPronostics();   // recalcul immédiat des pronostics (sans attendre le Worker)
+  lancerSimulation();     // relance MC → snapshot sauvé dans le callback
 }
 
 // ════════════════════════════════════════════════════════════════════
@@ -1334,6 +1478,448 @@ function remplirTableauElo() {
       <td><span class="elo-val">${eloBase}</span>${deltaStr}</td>
     </tr>`;
   }).join('');
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 17. MODÈLE DE PRÉDICTION — DOUBLE POISSON + CORRECTION DIXON-COLES
+// ════════════════════════════════════════════════════════════════════
+
+// NB : attackDef, DC_RHO, MU_GOALS, MAX_G, HMAP sont déclarés plus tôt (section 4)
+// pour éviter le TDZ lors de l'appel à recalculerEloActuel() au chargement.
+
+/**
+ * PMF de Poisson P(X=k ; λ), calculée en log-espace pour stabilité numérique.
+ */
+function poissonPMF(k, lambda) {
+  if (lambda <= 0) return k === 0 ? 1 : 0;
+  let logP = -lambda + k * Math.log(Math.max(lambda, 1e-10));
+  for (let i = 1; i <= k; i++) logP -= Math.log(i);
+  return Math.exp(logP);
+}
+
+/**
+ * Initialise att/def depuis les Élo courants.
+ * Équipe Élo 1600 → att = def = 1.0 (équipe "moyenne de tournoi").
+ * Chaque tranche de ±400 Élo ≈ ×1.78 ou ×0.56 de force.
+ */
+function initAttackDef() {
+  for (const nom of Object.keys(EQUIPES)) {
+    const elo  = eloActuel[nom] ?? EQUIPES[nom].elo;
+    const base = Math.pow(10, (elo - 1600) / 800);
+    attackDef[nom] = { att: base, def: base, n: 0 };
+  }
+}
+
+/**
+ * Recalcule toutes les forces att/def depuis zéro :
+ * initialisation Élo → replay chronologique de tous les résultats.
+ */
+function recalculerAttackDef() {
+  initAttackDef();
+  const joues = MATCHS_GROUPES
+    .filter(m => resultats[m.id])
+    .sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+  for (const m of joues) {
+    const r = resultats[m.id];
+    _majAttackDef(m.e1, m.e2, r.g1, r.g2);
+  }
+  _normaliserAD();
+}
+
+/**
+ * Mise à jour multiplicative att/def après un match.
+ * Taux d'apprentissage α croît avec les observations (0.08 → 0.28).
+ * Moitié du signal attribuée à l'attaque, moitié à la défense adverse.
+ */
+function _majAttackDef(n1, n2, g1, g2) {
+  if (!attackDef[n1] || !attackDef[n2]) return;
+  const nObs  = Math.max(attackDef[n1].n, attackDef[n2].n);
+  const alpha = Math.min(0.28, 0.08 + nObs * 0.025);  // apprentissage progressif
+
+  const { att: a1, def: d1 } = attackDef[n1];
+  const { att: a2, def: d2 } = attackDef[n2];
+
+  // Buts attendus avec les paramètres actuels
+  const lam1 = Math.max(0.1, a1 * d2 * MU_GOALS);
+  const lam2 = Math.max(0.1, a2 * d1 * MU_GOALS);
+
+  // Ratio observé/attendu (plafonné pour stabilité)
+  const r1 = Math.max(0.1, Math.min(8, (g1 + 0.1) / lam1));
+  const r2 = Math.max(0.1, Math.min(8, (g2 + 0.1) / lam2));
+
+  // Mise à jour : att de l'équipe qui marque + def de l'équipe qui encaisse
+  attackDef[n1].att *= Math.pow(r1, alpha / 2);
+  attackDef[n2].def *= Math.pow(r1, alpha / 2);
+  attackDef[n2].att *= Math.pow(r2, alpha / 2);
+  attackDef[n1].def *= Math.pow(r2, alpha / 2);
+
+  attackDef[n1].n++;
+  attackDef[n2].n++;
+}
+
+/**
+ * Normalise att et def (moyenne = 1) pour éviter la dérive des paramètres.
+ */
+function _normaliserAD() {
+  const noms = Object.keys(attackDef);
+  if (!noms.length) return;
+  const avgA = noms.reduce((s, n) => s + attackDef[n].att, 0) / noms.length;
+  const avgD = noms.reduce((s, n) => s + attackDef[n].def, 0) / noms.length;
+  if (avgA > 0 && avgD > 0) {
+    for (const n of noms) { attackDef[n].att /= avgA; attackDef[n].def /= avgD; }
+  }
+}
+
+/**
+ * Facteurs de contexte pour un match de groupe.
+ * hf1/hf2 : avantage du terrain (+30% buts pour les nations hôtes).
+ * enjeu   : enjeu du match (J3 légèrement plus fermé).
+ */
+function getContextFactors(m) {
+  const hf1  = NATIONS_HOTES.has(m.e1) ? 1.30 : 1.0;
+  const hf2  = NATIONS_HOTES.has(m.e2) ? 1.30 : 1.0;
+
+  // Enjeu J3 : vérifier si une équipe a déjà 6 pts (qualification décidée)
+  let enjeu = 1.0;
+  if (m.j === 3) {
+    const ms12 = MATCHS_GROUPES.filter(x => x.g === m.g && x.j < 3);
+    const pts  = {};
+    for (const t of Object.keys(EQUIPES).filter(e => EQUIPES[e].groupe === m.g))
+      pts[t] = 0;
+    for (const mx of ms12) {
+      const r = resultats[mx.id]; if (!r) continue;
+      pts[mx.e1] = (pts[mx.e1]??0) + (r.g1>r.g2?3:r.g1===r.g2?1:0);
+      pts[mx.e2] = (pts[mx.e2]??0) + (r.g2>r.g1?3:r.g1===r.g2?1:0);
+    }
+    const maxPts = Math.max(...Object.values(pts), 0);
+    // Si un leader est déjà qualifié : moins d'enjeu pour lui → match plus fermé
+    enjeu = maxPts >= 6 ? 0.82 : 0.93;
+  }
+
+  return { hf1, hf2, enjeu };
+}
+
+/**
+ * Calcule la matrice de probabilité des scores via le modèle Double Poisson
+ * avec correction Dixon-Coles pour les scores faibles (0-0, 1-0, 0-1, 1-1).
+ *
+ * La correction DC ajuste :
+ *   P(0-0) × (1 + λ₁λ₂ρ)  → augmente les matchs nuls vierges
+ *   P(1-0) × (1 − λ₂ρ)    → légère réduction
+ *   P(0-1) × (1 − λ₁ρ)    → légère réduction
+ *   P(1-1) × (1 + ρ)       → augmente les 1-1
+ *
+ * Retourne { bestScore, top5, heatmap, pWin, pDraw, pLoss, pOver, pUnder, lam1, lam2 }
+ */
+function predictMatch(lam1, lam2) {
+  const raw  = [];
+  let sumRaw = 0;
+
+  for (let g1 = 0; g1 <= MAX_G; g1++) {
+    raw[g1] = [];
+    for (let g2 = 0; g2 <= MAX_G; g2++) {
+      let p = poissonPMF(g1, lam1) * poissonPMF(g2, lam2);
+      // Correction Dixon-Coles (ρ > 0 → augmente 0-0 et 1-1)
+      if      (g1===0 && g2===0) p *= (1 + lam1 * lam2 * DC_RHO);
+      else if (g1===1 && g2===0) p *= Math.max(0, 1 - lam2 * DC_RHO);
+      else if (g1===0 && g2===1) p *= Math.max(0, 1 - lam1 * DC_RHO);
+      else if (g1===1 && g2===1) p *= (1 + DC_RHO);
+      raw[g1][g2] = Math.max(0, p);
+      sumRaw += raw[g1][g2];
+    }
+  }
+
+  // Normalisation
+  const mx = [];
+  for (let g1=0;g1<=MAX_G;g1++) {
+    mx[g1]=[];
+    for (let g2=0;g2<=MAX_G;g2++) mx[g1][g2] = raw[g1][g2] / sumRaw;
+  }
+
+  // Score le plus probable
+  let best = { g1:1, g2:1, p:0 };
+  for (let g1=0;g1<=MAX_G;g1++)
+    for (let g2=0;g2<=MAX_G;g2++)
+      if (mx[g1][g2] > best.p) best = { g1, g2, p:mx[g1][g2] };
+
+  // Win/Draw/Loss
+  let pW=0, pD=0, pL=0;
+  for (let g1=0;g1<=MAX_G;g1++)
+    for (let g2=0;g2<=MAX_G;g2++) {
+      if (g1>g2) pW+=mx[g1][g2]; else if(g1===g2) pD+=mx[g1][g2]; else pL+=mx[g1][g2];
+    }
+
+  // Over 2.5 (= au moins 3 buts au total)
+  let pO=0;
+  for (let g1=0;g1<=MAX_G;g1++)
+    for (let g2=0;g2<=MAX_G;g2++)
+      if (g1+g2>=3) pO+=mx[g1][g2];
+
+  // Top 5
+  const flat=[];
+  for (let g1=0;g1<=MAX_G;g1++) for (let g2=0;g2<=MAX_G;g2++) flat.push({g1,g2,p:mx[g1][g2]});
+  flat.sort((a,b)=>b.p-a.p);
+
+  // Heatmap 0..HMAP
+  const hm=[];
+  for (let g1=0;g1<=HMAP;g1++) { hm[g1]=[]; for(let g2=0;g2<=HMAP;g2++) hm[g1][g2]=mx[g1][g2]; }
+
+  return { best, top5:flat.slice(0,5), heatmap:hm, pWin:pW, pDraw:pD, pLoss:pL, pOver:pO, pUnder:1-pO, lam1, lam2 };
+}
+
+/**
+ * Obtient le pronostic complet pour un match de groupe (par ID ou objet match).
+ */
+function getPronostic(matchOrId) {
+  const m = typeof matchOrId==='string' ? MATCHS_GROUPES.find(x=>x.id===matchOrId) : matchOrId;
+  if (!m) return null;
+  const { hf1, hf2, enjeu } = getContextFactors(m);
+  const ad1 = attackDef[m.e1] ?? { att:1, def:1 };
+  const ad2 = attackDef[m.e2] ?? { att:1, def:1 };
+  const lam1 = Math.min(4.5, Math.max(0.2, ad1.att * ad2.def * MU_GOALS * hf1 * enjeu));
+  const lam2 = Math.min(4.5, Math.max(0.2, ad2.att * ad1.def * MU_GOALS * hf2 * enjeu));
+  return predictMatch(lam1, lam2);
+}
+
+// ─── Rendu compact (dans les onglets de groupe) ──────────────────────
+
+function renderPronoCompact(m) {
+  const pr  = getPronostic(m);
+  if (!pr) return '';
+  const res = resultats[m.id];
+
+  if (res) {
+    const isExact = res.g1===pr.best.g1 && res.g2===pr.best.g2;
+    const rP = pr.best.g1>pr.best.g2?1:pr.best.g1===pr.best.g2?0:-1;
+    const rR = res.g1>res.g2?1:res.g1===res.g2?0:-1;
+    const badge = isExact
+      ? `<span class="prono-badge badge-exact">✅ Exact</span>`
+      : rP===rR
+        ? `<span class="prono-badge badge-result">🟡 Résultat OK</span>`
+        : `<span class="prono-badge badge-miss">❌ Raté</span>`;
+    return `<div class="inline-prono">Prono&nbsp;<strong>${pr.best.g1}–${pr.best.g2}</strong>&nbsp;${badge}</div>`;
+  }
+
+  // Match à venir : afficher prédiction + lien "détail"
+  return `<div class="inline-prono">
+    <span class="prono-score-badge">🎯 ${pr.best.g1}-${pr.best.g2}</span>
+    <span>V:${(pr.pWin*100).toFixed(0)}% N:${(pr.pDraw*100).toFixed(0)}% D:${(pr.pLoss*100).toFixed(0)}%</span>
+    <span class="prono-lambda">λ=${pr.lam1.toFixed(1)}+${pr.lam2.toFixed(1)}</span>
+    <button class="prono-toggle" onclick="togglePronoDetail('${m.id}')">▼ détail</button>
+  </div>
+  <div class="prono-card prono-card-collapsed" id="pd-${m.id}">
+    ${renderPronoCard(m, pr)}
+  </div>`;
+}
+
+function togglePronoDetail(id) {
+  const el = document.getElementById(`pd-${id}`);
+  if (!el) return;
+  const open = el.style.display === 'block';
+  el.style.display = open ? 'none' : 'block';
+  // Mettre à jour le texte du bouton
+  const btns = document.querySelectorAll(`[onclick="togglePronoDetail('${id}')"]`);
+  btns.forEach(b => b.textContent = open ? '▼ détail' : '▲ fermer');
+}
+
+// ─── Rendu de la carte complète ─────────────────────────────────────
+
+function renderPronoCard(m, pr) {
+  const res     = resultats[m.id];
+  const top5Max = pr.top5[0]?.p ?? 1;
+
+  // Top 5 scores
+  const top5HTML = pr.top5.map(s => {
+    const isAct = res && s.g1===res.g1 && s.g2===res.g2;
+    return `<div class="top5-row${isAct?' is-actual':''}">
+      <span class="top5-lbl">${s.g1}-${s.g2}</span>
+      <div class="top5-bar"><div class="top5-fill" style="width:${(s.p/top5Max*100).toFixed(1)}%"></div></div>
+      <span class="top5-pct">${(s.p*100).toFixed(1)}%</span>
+    </div>`;
+  }).join('');
+
+  // Heatmap
+  let hmMax = 0;
+  for (let g1=0;g1<=HMAP;g1++) for(let g2=0;g2<=HMAP;g2++) hmMax = Math.max(hmMax, pr.heatmap[g1]?.[g2]??0);
+
+  let hmHTML = `<div class="heatmap-outer"><table class="heatmap-tbl">
+    <thead><tr><th>${m.e1.split(' ')[0]}↓\\${m.e2.split(' ')[0]}→</th>`;
+  for (let g2=0;g2<=HMAP;g2++) hmHTML += `<th>${g2}</th>`;
+  hmHTML += '</tr></thead><tbody>';
+  for (let g1=0;g1<=HMAP;g1++) {
+    hmHTML += `<tr><th>${g1}</th>`;
+    for (let g2=0;g2<=HMAP;g2++) {
+      const p  = pr.heatmap[g1]?.[g2] ?? 0;
+      const iv = hmMax>0 ? p/hmMax : 0;
+      const bg = `rgba(233,69,96,${(iv*0.82).toFixed(2)})`;
+      const fg = iv > 0.45 ? '#fff' : 'var(--text)';
+      const isAct = res && g1===res.g1 && g2===res.g2;
+      hmHTML += `<td style="background:${bg};color:${fg}"
+                     class="${isAct?'actual-score':''}"
+                     title="${m.e1} ${g1}-${g2} ${m.e2}">${(p*100).toFixed(1)}%</td>`;
+    }
+    hmHTML += '</tr>';
+  }
+  hmHTML += '</tbody></table></div>';
+
+  // Buts attendus et O/U
+  const totG = (pr.lam1+pr.lam2).toFixed(2);
+
+  return `<div>
+    <div class="prono-best-score">${pr.best.g1}-${pr.best.g2}
+      <span style="font-size:0.75rem;color:var(--muted);font-weight:400;margin-left:0.5rem">${(pr.best.p*100).toFixed(1)}%</span>
+    </div>
+    <div class="prono-best-sub">Score le plus probable · λ₁=${pr.lam1.toFixed(2)} · λ₂=${pr.lam2.toFixed(2)} · total=${totG}</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem">
+      <div>
+        <div class="prono-section-hd">Top 5 scores</div>
+        ${top5HTML}
+      </div>
+      <div>
+        <div class="prono-section-hd">Heatmap (buts)</div>
+        ${hmHTML}
+      </div>
+    </div>
+
+    <div class="prono-stats">
+      <div class="prono-stat-box">
+        <div class="pst-val" style="color:var(--green)">${(pr.pWin*100).toFixed(0)}%</div>
+        <div class="pst-lbl">Victoire ${m.e1.split(/[ -]/)[0]}</div>
+      </div>
+      <div class="prono-stat-box">
+        <div class="pst-val" style="color:var(--muted)">${(pr.pDraw*100).toFixed(0)}%</div>
+        <div class="pst-lbl">Nul</div>
+      </div>
+      <div class="prono-stat-box">
+        <div class="pst-val" style="color:var(--accent)">${(pr.pLoss*100).toFixed(0)}%</div>
+        <div class="pst-lbl">Victoire ${m.e2.split(/[ -]/)[0]}</div>
+      </div>
+      <div class="prono-stat-box">
+        <div class="pst-val" style="color:var(--blue)">${(pr.pOver*100).toFixed(0)}%</div>
+        <div class="pst-lbl">Over 2.5</div>
+      </div>
+      <div class="prono-stat-box">
+        <div class="pst-val">${totG}</div>
+        <div class="pst-lbl">Buts attendus</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─── Performance du modèle ──────────────────────────────────────────
+
+function evaluerPerformance() {
+  let total=0, exact=0, result=0;
+  for (const m of MATCHS_GROUPES) {
+    const r=resultats[m.id]; if(!r) continue;
+    total++;
+    const pr=getPronostic(m);
+    if (!pr) continue;
+    if (pr.best.g1===r.g1 && pr.best.g2===r.g2) exact++;
+    const rP = pr.best.g1>pr.best.g2?1:pr.best.g1===pr.best.g2?0:-1;
+    const rR = r.g1>r.g2?1:r.g1===r.g2?0:-1;
+    if (rP===rR) result++;
+  }
+  // Référence hasard : ~6.5% score exact, ~35% bon résultat
+  return {
+    total, exact, result,
+    rndExact:  Math.round(total * 0.065),
+    rndResult: Math.round(total * 0.35),
+  };
+}
+
+function afficherPerformance() {
+  const el = document.getElementById('prono-perf');
+  if (!el) return;
+  const p = evaluerPerformance();
+  if (p.total === 0) { el.style.display='none'; return; }
+  el.style.display = 'block';
+  const veX = p.exact  - p.rndExact;
+  const veR = p.result - p.rndResult;
+  const colX = veX>=0?'var(--green)':'var(--accent)';
+  const colR = veR>=0?'var(--green)':'var(--accent)';
+  el.innerHTML = `<div class="perf-card">
+    <div class="perf-title">📊 Performance du modèle — ${p.total} match${p.total>1?'s':''} joués</div>
+    <div class="perf-grid">
+      <div class="perf-item">
+        <div class="pi-val">${p.exact}/${p.total}</div>
+        <div class="pi-lbl">Scores exacts</div>
+        <div class="pi-vs" style="color:${colX}">${veX>=0?'+':''}${veX} vs hasard</div>
+      </div>
+      <div class="perf-item">
+        <div class="pi-val">${p.result}/${p.total}</div>
+        <div class="pi-lbl">Bons résultats (1/N/2)</div>
+        <div class="pi-vs" style="color:${colR}">${veR>=0?'+':''}${veR} vs hasard</div>
+      </div>
+      <div class="perf-item">
+        <div class="pi-val">${p.total>0?(p.exact/p.total*100).toFixed(0):'–'}%</div>
+        <div class="pi-lbl">Taux score exact</div>
+        <div class="pi-vs" style="color:var(--muted)">Hasard ≈ 6.5%</div>
+      </div>
+      <div class="perf-item">
+        <div class="pi-val">${p.total>0?(p.result/p.total*100).toFixed(0):'–'}%</div>
+        <div class="pi-lbl">Taux bon résultat</div>
+        <div class="pi-vs" style="color:var(--muted)">Hasard ≈ 35%</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─── Onglet Pronostics ──────────────────────────────────────────────
+
+function afficherPronostics() {
+  afficherPerformance();
+  const el = document.getElementById('pronostics-content');
+  if (!el) return;
+
+  const tries = [...MATCHS_GROUPES].sort((a,b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+  let html = '', lastDate = '';
+
+  for (const m of tries) {
+    const pr  = getPronostic(m);
+    if (!pr) continue;
+    const res = resultats[m.id];
+    const eq1 = EQUIPES[m.e1], eq2 = EQUIPES[m.e2];
+
+    // Séparateur de date
+    if (m.date !== lastDate) {
+      html += `<div class="date-separator">${formatDate(m.date)}</div>`;
+      lastDate = m.date;
+    }
+
+    // Badge résultat
+    let badge = `<span class="prono-badge badge-pending">À jouer</span>`;
+    if (res) {
+      const isEx = pr.best.g1===res.g1 && pr.best.g2===res.g2;
+      const rP   = pr.best.g1>pr.best.g2?1:pr.best.g1===pr.best.g2?0:-1;
+      const rR   = res.g1>res.g2?1:res.g1===res.g2?0:-1;
+      badge = isEx
+        ? `<span class="prono-badge badge-exact">✅ Score exact</span>`
+        : rP===rR
+          ? `<span class="prono-badge badge-result">🟡 Bon résultat</span>`
+          : `<span class="prono-badge badge-miss">❌ Raté</span>`;
+    }
+
+    html += `<div class="card" style="margin-bottom:0.75rem;padding:0.9rem">
+      <div class="prono-match-hd">
+        <div class="prono-match-teams">
+          ${eq1?drapeau(eq1.code):''} ${m.e1}
+          <span style="color:var(--muted);font-size:0.7rem">vs</span>
+          ${m.e2} ${eq2?drapeau(eq2.code):''}
+          <span style="font-size:0.62rem;color:var(--muted)">Grp.${m.g} J${m.j}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
+          ${res ? `<span style="font-weight:700;color:var(--green);font-size:0.82rem">⚽ ${res.g1}-${res.g2}</span>` : ''}
+          ${badge}
+          ${!res ? `<button class="btn btn-ghost" style="font-size:0.65rem;padding:0.2rem 0.5rem" onclick="ouvrirModal('${m.id}')">Saisir</button>` : ''}
+        </div>
+      </div>
+      ${renderPronoCard(m, pr)}
+    </div>`;
+  }
+
+  el.innerHTML = html || '<div class="empty"><div class="empty-icon">🎯</div>Aucun match trouvé</div>';
 }
 
 // ════════════════════════════════════════════════════════════════════
