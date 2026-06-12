@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏆 Coupe du Monde 2026 — Prédictions</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0d1117; --card: #161b22; --border: #30363d;
+      --text: #e6edf3; --muted: #8b949e; --accent: #e94560;
+      --gold: #f0c040; --blue: #58a6ff; --green: #3fb950;
+      --purple: #bc8cff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, #161b22 0%, #1c2333 100%);
+      border-bottom: 2px solid var(--accent);
+      padding: 1rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;
+    }
+    .header-left { display: flex; align-items: center; gap: 1rem; }
+    header h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; }
+    header h1 span { color: var(--accent); }
+    .badge { background: var(--accent); color: #fff; padding: 0.2rem 0.7rem; border-radius: 999px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .badge-blue { background: var(--blue); }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--card); border-bottom: 1px solid var(--border);
+      display: flex; overflow-x: auto; gap: 0; padding: 0 0.5rem;
+      scrollbar-width: none;
+    }
+    nav::-webkit-scrollbar { display: none; }
+    nav button {
+      background: none; border: none; color: var(--muted);
+      padding: 0.7rem 0.9rem; cursor: pointer; font-size: 0.8rem; font-weight: 500;
+      white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.15s;
+    }
+    nav button.active { color: var(--text); border-bottom-color: var(--accent); }
+    nav button:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+
+    /* ── LAYOUT ── */
+    main { max-width: 1200px; margin: 0 auto; padding: 1.25rem 1rem; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; }
+
+    /* ── CARDS ── */
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.1rem; margin-bottom: 1rem; }
+    .card-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.4rem; }
+
+    /* ── TABLES ── */
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    thead th { padding: 0.45rem 0.6rem; color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); text-align: left; font-weight: 600; }
+    tbody td { padding: 0.5rem 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: rgba(255,255,255,0.025); }
+
+    /* ── PROBABILITIES ── */
+    .bar-wrap { display: flex; align-items: center; gap: 0.5rem; }
+    .bar-track { flex: 1; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; min-width: 60px; }
+    .bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--gold)); border-radius: 3px; transition: width 0.6s ease; }
+    .bar-val { min-width: 3rem; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+    /* ── STAGE PILLS ── */
+    .stages { display: flex; gap: 0.2rem; flex-wrap: wrap; }
+    .pill { padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-size: 0.65rem; font-weight: 600; background: var(--border); color: var(--muted); }
+    .pill-green { background: rgba(63,185,80,0.2); color: var(--green); }
+    .pill-blue  { background: rgba(88,166,255,0.2); color: var(--blue); }
+    .pill-gold  { background: rgba(240,192,64,0.2); color: var(--gold); }
+    .pill-red   { background: rgba(233,69,96,0.2);  color: var(--accent); }
+
+    /* ── RANK CIRCLE ── */
+    .rank { display: inline-flex; align-items: center; justify-content: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; font-size: 0.7rem; font-weight: 700; background: var(--border); color: var(--muted); }
+    .r1 { background: var(--gold); color: #1a1a1a; }
+    .r2 { background: #b0bec5; color: #1a1a1a; }
+    .r3 { background: #cd7f32; color: #fff; }
+
+    /* ── FLAG ── */
+    .flag { font-size: 1.1rem; line-height: 1; }
+    .team-cell { display: flex; align-items: center; gap: 0.45rem; font-weight: 500; }
+
+    /* ── MATCH CARD ── */
+    .match-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .match-row:last-child { border-bottom: none; }
+    .match-team { display: flex; align-items: center; gap: 0.35rem; flex: 1; min-width: 0; font-size: 0.82rem; font-weight: 500; }
+    .match-team.right { justify-content: flex-end; flex-direction: row-reverse; }
+    .match-team span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .match-center { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; flex-shrink: 0; }
+    .score-box {
+      background: rgba(255,255,255,0.07); border: 1px solid var(--border);
+      padding: 0.2rem 0.55rem; border-radius: 0.35rem;
+      font-size: 0.9rem; font-weight: 700; min-width: 2.8rem; text-align: center;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .score-box:hover { background: rgba(255,255,255,0.12); }
+    .score-box.played { background: rgba(63,185,80,0.15); border-color: var(--green); color: var(--green); }
+    .match-date { font-size: 0.62rem; color: var(--muted); }
+    .match-proba { font-size: 0.62rem; color: var(--muted); white-space: nowrap; }
+
+    /* ── RESULT MODAL ── */
+    .modal-bg {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000; backdrop-filter: blur(4px);
+    }
+    .modal {
+      background: var(--card); border: 1px solid var(--border); border-radius: 1rem;
+      padding: 1.5rem; max-width: 380px; width: 90%; text-align: center;
+    }
+    .modal h3 { font-size: 1rem; margin-bottom: 1.25rem; }
+    .score-entry { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.25rem; }
+    .score-entry .team-name { font-size: 0.9rem; font-weight: 600; flex: 1; }
+    .score-entry .team-name.right { text-align: right; }
+    .score-entry input {
+      width: 2.8rem; padding: 0.4rem; text-align: center;
+      background: rgba(255,255,255,0.07); border: 1px solid var(--border);
+      color: var(--text); border-radius: 0.35rem; font-size: 1.2rem; font-weight: 700;
+    }
+    .score-sep { font-size: 1.3rem; font-weight: 700; color: var(--muted); }
+    .modal-btns { display: flex; gap: 0.5rem; justify-content: center; }
+    .btn { padding: 0.45rem 1rem; border-radius: 0.5rem; border: none; cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: opacity 0.15s; }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-ghost { background: var(--border); color: var(--text); }
+    .btn-danger { background: #da3633; color: #fff; font-size: 0.7rem; padding: 0.3rem 0.6rem; }
+
+    /* ── SIMULATION BUTTON ── */
+    .sim-bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .btn-sim {
+      background: linear-gradient(135deg, var(--accent), #f5742a);
+      color: #fff; border: none; padding: 0.6rem 1.4rem;
+      border-radius: 0.5rem; cursor: pointer; font-size: 0.9rem; font-weight: 700;
+      transition: transform 0.1s, opacity 0.15s; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .btn-sim:hover { transform: scale(1.02); }
+    .btn-sim:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
+    .sim-info { font-size: 0.8rem; color: var(--muted); }
+    .spinner { display: inline-block; width: 0.85rem; height: 0.85rem; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
+    .progress-bar { width: 180px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; align-self: center; }
+    .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--gold)); border-radius: 3px; transition: width 0.15s linear; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── GROUP STANDINGS ── */
+    .qual-1 td { border-left: 2px solid var(--green); }
+    .qual-2 td { border-left: 2px solid var(--blue); }
+    .qual-3rd td { border-left: 2px solid var(--gold); }
+
+    /* ── CHART ── */
+    .chart-wrap { position: relative; height: 320px; }
+
+    /* ── ELO TABLE ── */
+    .elo-val { font-family: 'Consolas', monospace; font-weight: 700; color: var(--blue); }
+    .confed-badge { font-size: 0.65rem; padding: 0.1rem 0.35rem; border-radius: 0.25rem; background: var(--border); color: var(--muted); }
+
+    /* ── STAT BOXES (header of group page) ── */
+    .stat-row { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .stat-box { background: var(--card); border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.6rem 0.9rem; font-size: 0.75rem; color: var(--muted); }
+    .stat-box strong { display: block; font-size: 1.1rem; color: var(--text); font-weight: 700; }
+
+    /* ── TOOLTIP on proba cells ── */
+    [title] { cursor: help; }
+
+    /* ── EMPTY STATE ── */
+    .empty { text-align: center; padding: 2.5rem 1rem; color: var(--muted); font-size: 0.85rem; }
+    .empty-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+
+    /* ── THÈME CLAIR ── */
+    [data-theme="light"] {
+      --bg: #f0f2f5; --card: #ffffff; --border: #dde1e7;
+      --text: #1a1a2e; --muted: #6b7a8d;
+    }
+    [data-theme="light"] .elo-val       { color: #1d4ed8; }
+    [data-theme="light"] .confed-badge  { background: #e8eaed; color: #6b7a8d; }
+    [data-theme="light"] nav            { background: #fff; border-bottom-color: #dde1e7; }
+    [data-theme="light"] nav button     { color: #6b7a8d; }
+    [data-theme="light"] nav button.active { color: #1a1a2e; }
+    [data-theme="light"] .score-box     { background: #eef0f3; border-color: #dde1e7; color: #1a1a2e; }
+    [data-theme="light"] .modal         { background: #fff; }
+    [data-theme="light"] .modal-bg      { background: rgba(0,0,0,0.4); }
+    [data-theme="light"] input[type=number] { background: #eef0f3; border-color: #dde1e7; color: #1a1a2e; }
+
+    /* ── TOGGLE THÈME ── */
+    .theme-btn { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:0.3rem 0.75rem; border-radius:1rem; cursor:pointer; font-size:0.8rem; transition:background 0.15s; flex-shrink:0; }
+    .theme-btn:hover { background:rgba(255,255,255,0.22); }
+
+    /* ── BRACKET ── */
+    .bracket-outer { overflow-x: auto; margin: 0 -0.5rem; padding: 0 0.5rem 0.5rem; }
+    .bracket-inner { display: flex; height: 660px; min-width: 860px; gap: 0; }
+    .b-col { display: flex; flex-direction: column; flex: 1; min-width: 135px; }
+    .b-col-hd { text-align:center; font-size:0.6rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; font-weight:700; padding:0.35rem 0; border-bottom:1px solid var(--border); flex-shrink:0; }
+    .b-slots { display:flex; flex-direction:column; flex:1; }
+    /* Each match wrapper takes equal vertical space — natural alignment between rounds */
+    .b-group { display:flex; flex:1; align-items:center; padding:1px 3px; position:relative; }
+    /* Right horizontal connector line */
+    .b-group::after { content:''; position:absolute; right:0; top:50%; width:3px; border-top:1px solid var(--border); }
+    .b-col:last-child .b-group::after { display:none; }
+    .b-match-box { width:100%; background:var(--card); border:1px solid var(--border); border-radius:4px; overflow:hidden; }
+    .b-team { display:flex; align-items:center; justify-content:space-between; gap:0.2rem; padding:0.28rem 0.42rem; font-size:0.68rem; border-bottom:1px solid var(--border); min-width:0; }
+    .b-team:last-child { border-bottom:none; }
+    .b-team.fav { background:rgba(233,69,96,0.1); }
+    .b-team .b-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; flex:1; }
+    .b-team .b-pct { font-size:0.6rem; color:var(--muted); white-space:nowrap; flex-shrink:0; }
+    .b-team .b-pct.hi { color:var(--green); font-weight:600; }
+    .b-team .b-pct.md { color:var(--gold); }
+    .b-champion { display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; padding:0 6px; text-align:center; gap:0.3rem; }
+    .b-champion .b-trophy { font-size:2.5rem; }
+    .b-champion .b-champ-name { font-weight:700; font-size:0.85rem; }
+    .b-champion .b-champ-pct { font-size:0.7rem; color:var(--muted); }
+    /* Vertical connector between pairs — uses pair wrapper */
+    .b-pair { display:flex; flex-direction:column; flex:1; position:relative; }
+    .b-pair::before { content:''; position:absolute; right:0; top:25%; height:50%; border-right:1px solid var(--border); }
+
+    /* ── MATCHS DU JOUR ── */
+    .today-banner { background:linear-gradient(135deg,rgba(233,69,96,0.08),rgba(240,192,64,0.08)); border:1px solid rgba(233,69,96,0.25); border-radius:0.75rem; padding:1rem; margin-bottom:1.25rem; }
+    .today-title  { font-size:0.72rem; font-weight:700; color:var(--gold); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem; }
+    .today-title .today-dot { width:7px; height:7px; border-radius:50%; background:var(--accent); animation:pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .today-scroll { display:flex; gap:0.75rem; overflow-x:auto; padding-bottom:0.25rem; scrollbar-width:none; }
+    .today-scroll::-webkit-scrollbar { display:none; }
+    .today-card { background:var(--card); border:1px solid var(--border); border-radius:0.5rem; padding:0.6rem 0.75rem; min-width:185px; flex-shrink:0; }
+    .today-card-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.3rem; }
+    .tag-today  { font-size:0.58rem; font-weight:700; padding:0.1rem 0.35rem; border-radius:0.25rem; background:rgba(233,69,96,0.18); color:var(--accent); }
+    .tag-demain { font-size:0.58rem; font-weight:700; padding:0.1rem 0.35rem; border-radius:0.25rem; background:rgba(240,192,64,0.18); color:var(--gold); }
+    .today-teams { display:flex; align-items:center; justify-content:space-between; gap:0.3rem; font-size:0.78rem; font-weight:600; margin-bottom:0.28rem; }
+    .today-vs    { font-size:0.62rem; color:var(--muted); }
+    .today-probas { display:flex; gap:0.2rem; font-size:0.62rem; color:var(--muted); margin-bottom:0.35rem; }
+    .btn-quick   { background:var(--accent); color:#fff; border:none; padding:0.22rem 0.55rem; border-radius:0.25rem; cursor:pointer; font-size:0.64rem; font-weight:700; }
+    .played-ok   { font-size:0.7rem; color:var(--green); font-weight:600; }
+
+    /* ── HISTORIQUE ── */
+    .hist-chart-wrap { position:relative; height:260px; }
+
+    /* ── BARRES COLORÉES (qualification) ── */
+    .bar-fill.q-hi { background:var(--green); }
+    .bar-fill.q-md { background:#fd9644; }
+    .bar-fill.q-lo { background:var(--accent); }
+
+    /* ── MOBILE ── */
+    @media (max-width: 680px) {
+      header h1 { font-size: 1.05rem; }
+      .match-team span { max-width: 72px; }
+      .grid2 { grid-template-columns: 1fr; }
+      td, th { padding: 0.35rem 0.4rem; font-size: 0.75rem; }
+      .card { padding: 0.85rem; }
+      /* Nav groupes → select sur mobile */
+      nav .group-nav-btn { display: none; }
+      #groups-select-wrap { padding: 0 1rem 0.5rem; }
+      #groups-select { display: block !important; width:100%; padding:0.5rem 0.75rem; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:0.5rem; font-size:0.85rem; }
+      /* Tables scrollables */
+      .table-scroll { overflow-x: auto; }
+      .sim-bar { flex-wrap: wrap; }
+    }
+    @media (min-width: 681px) {
+      #groups-select-wrap { display: none !important; }
+      nav .group-nav-btn { display: inline-block; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>🏆 Coupe du Monde <span>2026</span></h1>
+    <span class="badge">USA · CAN · MEX</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:0.6rem">
+    <span class="badge badge-blue" id="header-sim-state">Simulation non lancée</span>
+    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Basculer thème clair/sombre">🌙</button>
+  </div>
+</header>
+
+<nav id="main-nav">
+  <button onclick="showTab('apercu')" class="active" data-tab="apercu">Vue d'ensemble</button>
+  <button onclick="showTab('bracket')" data-tab="bracket">Tableau final</button>
+  <!-- Les onglets groupes sont injectés dynamiquement (classe group-nav-btn) -->
+  <button onclick="showTab('elo')" data-tab="elo">Classement Élo</button>
+</nav>
+
+<!-- Sélecteur groupes pour mobile -->
+<div id="groups-select-wrap" style="display:none">
+  <select id="groups-select" onchange="showTab(this.value)">
+    <option value="apercu">Vue d'ensemble</option>
+    <option value="bracket">Tableau final</option>
+    <option value="elo">Classement Élo</option>
+  </select>
+</div>
+
+<main>
+
+  <!-- ══════════════════════════════════════════
+       ONGLET : VUE D'ENSEMBLE
+  ══════════════════════════════════════════ -->
+  <div id="panel-apercu" class="tab-panel active">
+
+    <!-- Bandeau matchs du jour/demain -->
+    <div class="today-banner" id="today-banner" style="display:none">
+      <div class="today-title"><span class="today-dot"></span> Matchs aujourd'hui &amp; demain</div>
+      <div class="today-scroll" id="today-matches-list"></div>
+    </div>
+
+    <div class="sim-bar">
+      <button class="btn-sim" id="btn-sim" onclick="lancerSimulation()">
+        ▶ Simuler (100 000 itérations)
+      </button>
+      <div class="progress-bar" id="progress-bar" style="display:none"><div class="progress-fill" id="progress-fill"></div></div>
+      <span class="sim-info" id="sim-status">Cliquez pour lancer la simulation Monte Carlo</span>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">🥇 Chances de victoire finale</div>
+        <table>
+          <thead><tr><th></th><th>Équipe</th><th>Élo</th><th>Probabilité</th></tr></thead>
+          <tbody id="tb-victoire">
+            <div class="empty" style="padding:1.5rem 0;text-align:center;color:var(--muted);font-size:0.8rem;">
+              Lancez la simulation →
+            </div>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📊 Top 8 favoris — probabilité de victoire</div>
+        <div class="chart-wrap"><canvas id="chart-favoris"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📈 Probabilités d'atteindre chaque stade</div>
+      <table>
+        <thead>
+          <tr>
+            <th></th><th>Équipe</th>
+            <th title="Seizièmes de finale (32 équipes qualifiées)">16èmes</th>
+            <th title="Huitièmes de finale">8èmes</th>
+            <th title="Quarts de finale">Quarts</th>
+            <th title="Demi-finales">Demies</th>
+            <th title="Finale">Finale</th>
+            <th title="Vainqueur">🏆</th>
+          </tr>
+        </thead>
+        <tbody id="tb-stades">
+          <tr><td colspan="7"><div class="empty"><div class="empty-icon">⚽</div>Lancez la simulation pour voir les probabilités</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- Historique des probabilités -->
+    <div class="card" id="card-historique" style="display:none">
+      <div class="card-title">📉 Évolution des probabilités — top 8 au fil des matchs</div>
+      <div class="hist-chart-wrap"><canvas id="chart-historique"></canvas></div>
+      <p style="font-size:0.68rem;color:var(--muted);margin-top:0.5rem">
+        Chaque point correspond à un snapshot pris après saisie d'un résultat réel.
+      </p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       ONGLET : TABLEAU FINAL (BRACKET)
+  ══════════════════════════════════════════ -->
+  <div id="panel-bracket" class="tab-panel">
+    <div class="card">
+      <div class="card-title">🏆 Tableau final — bracket à élimination directe</div>
+      <p style="font-size:0.72rem;color:var(--muted);margin-bottom:1rem">
+        Équipes les plus probables à chaque stade, calculées par propagation Élo. Les % indiquent la probabilité Monte Carlo d'atteindre ce stade.
+      </p>
+      <div id="bracket-content"><div class="empty"><div class="empty-icon">⚽</div>Lancez la simulation pour voir le tableau</div></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       ONGLETS GROUPES (injectés dynamiquement)
+  ══════════════════════════════════════════ -->
+
+  <!-- ══════════════════════════════════════════
+       ONGLET : CLASSEMENT ÉLO
+  ══════════════════════════════════════════ -->
+  <div id="panel-elo" class="tab-panel">
+    <div class="card">
+      <div class="card-title">📊 Classement Élo — 48 équipes qualifiées</div>
+      <p style="font-size:0.75rem;color:var(--muted);margin-bottom:0.75rem;">
+        Basé sur eloratings.net (estimations juin 2026). Le système Élo mesure la force relative des équipes nationales.
+      </p>
+      <table>
+        <thead><tr><th>#</th><th>Équipe</th><th>Groupe</th><th>Conf.</th><th>Élo</th></tr></thead>
+        <tbody id="tb-elo"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══════════════════════════════════════════
+     CODE DU WEB WORKER (type text/plain = non exécuté par le navigateur)
+     Lu par le thread principal pour créer un Blob Worker.
+══════════════════════════════════════════ -->
+<script id="worker-src" type="text/plain">
+'use strict';
+
+/* Fonctions pures de simulation — aucun accès DOM */
+
+function poisson(lambda) {
+  if (lambda <= 0) return 0;
+  const L = Math.exp(-Math.min(lambda, 20));
+  let k = 0, p = 1;
+  do { k++; p *= Math.random(); } while (p > L);
+  return k - 1;
+}
+
+/* λ = 1.35 × 10^(ΔÉlo/600), plafonné 0.3–5.0 buts */
+function simMatch(elo1, elo2) {
+  const l1 = Math.min(5, Math.max(0.3, 1.35 * Math.pow(10, (elo1 - elo2) / 600)));
+  const l2 = Math.min(5, Math.max(0.3, 1.35 * Math.pow(10, (elo2 - elo1) / 600)));
+  return { g1: poisson(l1), g2: poisson(l2) };
+}
+
+/* Éliminatoire : Poisson → tirs au but si nul (coin Élo-pondéré) */
+function simKO(elo1, elo2) {
+  const { g1, g2 } = simMatch(elo1, elo2);
+  if (g1 !== g2) return g1 > g2 ? 1 : 2;
+  return Math.random() < 1 / (1 + Math.pow(10, -(elo1 - elo2) / 400)) ? 1 : 2;
+}
+
+/* Classement groupe — critères FIFA : pts → db → bm → tirage */
+function classerGroupe(equipes, scores) {
+  const [e1, e2, e3, e4] = equipes;
+  const pts = {}, db = {}, bm = {};
+  for (const e of equipes) { pts[e] = 0; db[e] = 0; bm[e] = 0; }
+  function app(a, b, ga, gb) {
+    bm[a] += ga; bm[b] += gb; db[a] += ga - gb; db[b] += gb - ga;
+    if (ga > gb) pts[a] += 3; else if (ga === gb) { pts[a]++; pts[b]++; } else pts[b] += 3;
+  }
+  app(e1,e2,scores[0].g1,scores[0].g2); app(e3,e4,scores[1].g1,scores[1].g2);
+  app(e1,e3,scores[2].g1,scores[2].g2); app(e2,e4,scores[3].g1,scores[3].g2);
+  app(e1,e4,scores[4].g1,scores[4].g2); app(e2,e3,scores[5].g1,scores[5].g2);
+  return [...equipes].sort((a,b) =>
+    (pts[b]-pts[a])||(db[b]-db[a])||(bm[b]-bm[a])||(Math.random()-0.5)
+  ).map(e => ({ nom:e, pts:pts[e], db:db[e], bm:bm[e] }));
+}
+
+function simulerTournoi(eqs, matchsG, res, eloMap, brkt, hotes, bonusDom) {
+  const getE = n => { const b = eloMap[n]??1500; return hotes.has(n) ? b+bonusDom : b; };
+  const LETTRES = 'ABCDEFGHIJKL'.split('');
+  const cl = {};
+  for (const L of LETTRES) {
+    const mbrs = Object.keys(eqs).filter(e => eqs[e].groupe === L);
+    const ms   = matchsG.filter(m=>m.g===L).sort((a,b)=>a.j-b.j||a.id.localeCompare(b.id));
+    cl[L] = classerGroupe(mbrs, ms.map(m => res[m.id] || simMatch(getE(m.e1), getE(m.e2))));
+  }
+  const top={}, t3=[];
+  for (const L of LETTRES) {
+    top[`1${L}`]=cl[L][0].nom; top[`2${L}`]=cl[L][1].nom;
+    t3.push({...cl[L][2], groupe:L});
+  }
+  const best3 = [...t3].sort((a,b)=>(b.pts-a.pts)||(b.db-a.db)||(b.bm-a.bm)||(Math.random()-0.5))
+    .slice(0,8).map(t=>t.nom);
+  const perf = {};
+  for (const n of Object.keys(eqs)) perf[n]={r32:false,r16:false,qf:false,sf:false,finale:false,vainqueur:false};
+  for (const eq of Object.values(top)) if(perf[eq]) perf[eq].r32=true;
+  for (const eq of best3) if(perf[eq]) perf[eq].r32=true;
+  const resolve = s => s.startsWith('3rd_') ? (best3[+s.slice(4)]||null) : (top[s]||null);
+  const vR32 = brkt.map(([s1,s2]) => {
+    const a=resolve(s1), b=resolve(s2);
+    if(!a||!b) return a||b||null;
+    const g=simKO(getE(a),getE(b))===1?a:b;
+    if(perf[g]) perf[g].r16=true; return g;
+  });
+  function rnd(arr, stg) {
+    const out=[];
+    for(let i=0;i<arr.length/2;i++){
+      const [a,b]=[arr[i*2],arr[i*2+1]];
+      if(!a||!b){out.push(a||b);continue;}
+      const g=simKO(getE(a),getE(b))===1?a:b;
+      if(perf[g]) perf[g][stg]=true; out.push(g);
+    }
+    return out;
+  }
+  const vR16=rnd(vR32,'qf'), vQF=rnd(vR16,'sf'), vSF=rnd(vQF,'finale');
+  const [f1,f2]=vSF;
+  if(f1&&f2){ const g=simKO(getE(f1),getE(f2))===1?f1:f2; if(perf[g]) perf[g].vainqueur=true; }
+  return perf;
+}
+
+/* Handler principal du Worker */
+self.onmessage = function(ev) {
+  const { equipes, matchsGroupes, resultats, eloActuel,
+          bracketR32, nationsHotes, bonusDomicile, N, batchSize } = ev.data;
+  const HOTES = new Set(nationsHotes);
+  const cpts = {};
+  for (const n of Object.keys(equipes))
+    cpts[n] = { r32:0, r16:0, qf:0, sf:0, finale:0, vainqueur:0 };
+  let done = 0;
+  function batch() {
+    const end = Math.min(done + batchSize, N);
+    while (done < end) {
+      const p = simulerTournoi(equipes, matchsGroupes, resultats, eloActuel,
+                               bracketR32, HOTES, bonusDomicile);
+      for (const [n, v] of Object.entries(p)) {
+        if (!cpts[n]) continue;
+        if(v.r32)cpts[n].r32++; if(v.r16)cpts[n].r16++;
+        if(v.qf) cpts[n].qf++;  if(v.sf) cpts[n].sf++;
+        if(v.finale)cpts[n].finale++; if(v.vainqueur)cpts[n].vainqueur++;
+      }
+      done++;
+    }
+    self.postMessage({ type:'progress', done, total:N });
+    if (done < N) { setTimeout(batch, 0); }
+    else {
+      const probs = {};
+      for (const [n,c] of Object.entries(cpts))
+        probs[n] = { r32:c.r32/N, r16:c.r16/N, qf:c.qf/N,
+                     sf:c.sf/N, finale:c.finale/N, vainqueur:c.vainqueur/N };
+      self.postMessage({ type:'result', probs });
+    }
+  }
+  batch();
+};
+</script>
+
+<!-- ══════════════════════════════════════════
+     MODAL DE SAISIE DES RÉSULTATS
+══════════════════════════════════════════ -->
+<div id="modal-bg" class="modal-bg" style="display:none" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3 id="modal-title">Saisir le résultat</h3>
+    <div class="score-entry">
+      <div class="team-name" id="modal-team1">—</div>
+      <input type="number" id="modal-g1" min="0" max="20" value="0">
+      <span class="score-sep">:</span>
+      <input type="number" id="modal-g2" min="0" max="20" value="0">
+      <div class="team-name right" id="modal-team2">—</div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-primary" onclick="validerResultat()">✓ Valider</button>
+      <button class="btn btn-danger" onclick="effacerResultat()">✕ Effacer</button>
+      <button class="btn btn-ghost" onclick="fermerModal()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ════════════════════════════════════════════════════════════════════
+// 1. DONNÉES : 48 ÉQUIPES AVEC RATINGS ÉLO
+//    Source : eloratings.net (estimations, juin 2026)
+//    Chaque équipe a : elo, confédération, code pays ISO, groupe
+// ════════════════════════════════════════════════════════════════════
+
+const EQUIPES = {
+  // ─── GROUPE A ─── Mexique · Afrique du Sud · Corée du Sud · Tchéquie
+  // (Mexique en e1 : match d'ouverture A1 = MEX vs RSA le 11 juin)
+  'Mexique':          { elo: 1692, confed: 'CONCACAF', code: 'MX', groupe: 'A' },
+  'Afrique du Sud':   { elo: 1493, confed: 'CAF',      code: 'ZA', groupe: 'A' },
+  'Corée du Sud':     { elo: 1648, confed: 'AFC',      code: 'KR', groupe: 'A' },
+  'Tchéquie':         { elo: 1578, confed: 'UEFA',     code: 'CZ', groupe: 'A' },
+
+  // ─── GROUPE B ─── Canada · Bosnie-Herzégovine · Qatar · Suisse
+  'Canada':           { elo: 1623, confed: 'CONCACAF', code: 'CA', groupe: 'B' },
+  'Bosnie-Herzég.':   { elo: 1538, confed: 'UEFA',     code: 'BA', groupe: 'B' },
+  'Qatar':            { elo: 1520, confed: 'AFC',      code: 'QA', groupe: 'B' },
+  'Suisse':           { elo: 1672, confed: 'UEFA',     code: 'CH', groupe: 'B' },
+
+  // ─── GROUPE C ─── Brésil · Maroc · Haïti · Écosse
+  'Brésil':           { elo: 1803, confed: 'CONMEBOL', code: 'BR', groupe: 'C' },
+  'Maroc':            { elo: 1712, confed: 'CAF',      code: 'MA', groupe: 'C' },
+  'Haïti':            { elo: 1425, confed: 'CONCACAF', code: 'HT', groupe: 'C' },
+  'Écosse':           { elo: 1665, confed: 'UEFA',     code: 'SCT', groupe: 'C' },
+
+  // ─── GROUPE D ─── États-Unis · Paraguay · Australie · Turquie
+  'États-Unis':       { elo: 1698, confed: 'CONCACAF', code: 'US', groupe: 'D' },
+  'Paraguay':         { elo: 1568, confed: 'CONMEBOL', code: 'PY', groupe: 'D' },
+  'Australie':        { elo: 1641, confed: 'AFC',      code: 'AU', groupe: 'D' },
+  'Turquie':          { elo: 1618, confed: 'UEFA',     code: 'TR', groupe: 'D' },
+
+  // ─── GROUPE E ─── Allemagne · Curaçao · Côte d'Ivoire · Équateur
+  'Allemagne':        { elo: 1765, confed: 'UEFA',     code: 'DE', groupe: 'E' },
+  'Curaçao':          { elo: 1448, confed: 'CONCACAF', code: 'CW', groupe: 'E' },
+  "Côte d'Ivoire":    { elo: 1571, confed: 'CAF',      code: 'CI', groupe: 'E' },
+  'Équateur':         { elo: 1635, confed: 'CONMEBOL', code: 'EC', groupe: 'E' },
+
+  // ─── GROUPE F ─── Pays-Bas · Japon · Suède · Tunisie
+  'Pays-Bas':         { elo: 1757, confed: 'UEFA',     code: 'NL', groupe: 'F' },
+  'Japon':            { elo: 1655, confed: 'AFC',      code: 'JP', groupe: 'F' },
+  'Suède':            { elo: 1652, confed: 'UEFA',     code: 'SE', groupe: 'F' },
+  'Tunisie':          { elo: 1543, confed: 'CAF',      code: 'TN', groupe: 'F' },
+
+  // ─── GROUPE G ─── Belgique · Égypte · Iran · Nouvelle-Zélande
+  'Belgique':         { elo: 1736, confed: 'UEFA',     code: 'BE', groupe: 'G' },
+  'Égypte':           { elo: 1535, confed: 'CAF',      code: 'EG', groupe: 'G' },
+  'Iran':             { elo: 1629, confed: 'AFC',      code: 'IR', groupe: 'G' },
+  'Nlle-Zélande':     { elo: 1487, confed: 'OFC',      code: 'NZ', groupe: 'G' },
+
+  // ─── GROUPE H ─── Espagne · Cap-Vert · Arabie saoudite · Uruguay
+  'Espagne':          { elo: 1815, confed: 'UEFA',     code: 'ES', groupe: 'H' },
+  'Cap-Vert':         { elo: 1530, confed: 'CAF',      code: 'CV', groupe: 'H' },
+  'Arabie saoudite':  { elo: 1598, confed: 'AFC',      code: 'SA', groupe: 'H' },
+  'Uruguay':          { elo: 1682, confed: 'CONMEBOL', code: 'UY', groupe: 'H' },
+
+  // ─── GROUPE I ─── France · Sénégal · Irak · Norvège
+  'France':           { elo: 1843, confed: 'UEFA',     code: 'FR', groupe: 'I' },
+  'Sénégal':          { elo: 1661, confed: 'CAF',      code: 'SN', groupe: 'I' },
+  'Irak':             { elo: 1505, confed: 'AFC',      code: 'IQ', groupe: 'I' },
+  'Norvège':          { elo: 1658, confed: 'UEFA',     code: 'NO', groupe: 'I' },
+
+  // ─── GROUPE J ─── Argentine · Algérie · Autriche · Jordanie
+  'Argentine':        { elo: 1852, confed: 'CONMEBOL', code: 'AR', groupe: 'J' },
+  'Algérie':          { elo: 1524, confed: 'CAF',      code: 'DZ', groupe: 'J' },
+  'Autriche':         { elo: 1578, confed: 'UEFA',     code: 'AT', groupe: 'J' },
+  'Jordanie':         { elo: 1465, confed: 'AFC',      code: 'JO', groupe: 'J' },
+
+  // ─── GROUPE K ─── Portugal · RD Congo · Ouzbékistan · Colombie
+  'Portugal':         { elo: 1782, confed: 'UEFA',     code: 'PT', groupe: 'K' },
+  'RD Congo':         { elo: 1495, confed: 'CAF',      code: 'CD', groupe: 'K' },
+  'Ouzbékistan':      { elo: 1522, confed: 'AFC',      code: 'UZ', groupe: 'K' },
+  'Colombie':         { elo: 1706, confed: 'CONMEBOL', code: 'CO', groupe: 'K' },
+
+  // ─── GROUPE L ─── Angleterre · Croatie · Ghana · Panama
+  'Angleterre':       { elo: 1822, confed: 'UEFA',     code: 'ENG', groupe: 'L' },
+  'Croatie':          { elo: 1688, confed: 'UEFA',     code: 'HR', groupe: 'L' },
+  'Ghana':            { elo: 1563, confed: 'CAF',      code: 'GH', groupe: 'L' },
+  'Panama':           { elo: 1547, confed: 'CONCACAF', code: 'PA', groupe: 'L' },
+};
+
+// ════════════════════════════════════════════════════════════════════
+// 2. CALENDRIER DES MATCHS DE PHASE DE GROUPES
+//    72 matchs (6 par groupe × 12 groupes)
+//    Journée 1 : match 1+2 | Journée 2 : match 3+4 | Journée 3 : match 5+6
+// ════════════════════════════════════════════════════════════════════
+
+const MATCHS_GROUPES = [
+  // ─── GROUPE A ─── Mexique (e1) · Afrique du Sud (e2) · Corée du Sud (e3) · Tchéquie (e4)
+  // Match d'ouverture : Mexique vs Afrique du Sud le 11 juin 2026
+  { id:'A1', g:'A', e1:'Mexique',        e2:'Afrique du Sud', date:'2026-06-11', j:1 },
+  { id:'A2', g:'A', e1:'Corée du Sud',   e2:'Tchéquie',       date:'2026-06-11', j:1 },
+  { id:'A3', g:'A', e1:'Mexique',        e2:'Corée du Sud',   date:'2026-06-16', j:2 },
+  { id:'A4', g:'A', e1:'Afrique du Sud', e2:'Tchéquie',       date:'2026-06-16', j:2 },
+  { id:'A5', g:'A', e1:'Mexique',        e2:'Tchéquie',       date:'2026-06-26', j:3 },
+  { id:'A6', g:'A', e1:'Afrique du Sud', e2:'Corée du Sud',   date:'2026-06-26', j:3 },
+
+  // ─── GROUPE B ─── Canada (e1) · Bosnie-Herzég. (e2) · Qatar (e3) · Suisse (e4)
+  { id:'B1', g:'B', e1:'Canada',         e2:'Bosnie-Herzég.', date:'2026-06-12', j:1 },
+  { id:'B2', g:'B', e1:'Qatar',          e2:'Suisse',         date:'2026-06-12', j:1 },
+  { id:'B3', g:'B', e1:'Canada',         e2:'Qatar',          date:'2026-06-17', j:2 },
+  { id:'B4', g:'B', e1:'Bosnie-Herzég.', e2:'Suisse',         date:'2026-06-17', j:2 },
+  { id:'B5', g:'B', e1:'Canada',         e2:'Suisse',         date:'2026-06-25', j:3 },
+  { id:'B6', g:'B', e1:'Bosnie-Herzég.', e2:'Qatar',          date:'2026-06-25', j:3 },
+
+  // ─── GROUPE C ─── Brésil (e1) · Maroc (e2) · Haïti (e3) · Écosse (e4)
+  { id:'C1', g:'C', e1:'Brésil',         e2:'Maroc',          date:'2026-06-13', j:1 },
+  { id:'C2', g:'C', e1:'Haïti',          e2:'Écosse',         date:'2026-06-13', j:1 },
+  { id:'C3', g:'C', e1:'Brésil',         e2:'Haïti',          date:'2026-06-18', j:2 },
+  { id:'C4', g:'C', e1:'Maroc',          e2:'Écosse',         date:'2026-06-18', j:2 },
+  { id:'C5', g:'C', e1:'Brésil',         e2:'Écosse',         date:'2026-06-27', j:3 },
+  { id:'C6', g:'C', e1:'Maroc',          e2:'Haïti',          date:'2026-06-27', j:3 },
+
+  // ─── GROUPE D ─── États-Unis (e1) · Paraguay (e2) · Australie (e3) · Turquie (e4)
+  { id:'D1', g:'D', e1:'États-Unis',     e2:'Paraguay',       date:'2026-06-12', j:1 },
+  { id:'D2', g:'D', e1:'Australie',      e2:'Turquie',        date:'2026-06-12', j:1 },
+  { id:'D3', g:'D', e1:'États-Unis',     e2:'Australie',      date:'2026-06-18', j:2 },
+  { id:'D4', g:'D', e1:'Paraguay',       e2:'Turquie',        date:'2026-06-18', j:2 },
+  { id:'D5', g:'D', e1:'États-Unis',     e2:'Turquie',        date:'2026-06-27', j:3 },
+  { id:'D6', g:'D', e1:'Paraguay',       e2:'Australie',      date:'2026-06-27', j:3 },
+
+  // ─── GROUPE E ─── Allemagne (e1) · Curaçao (e2) · Côte d'Ivoire (e3) · Équateur (e4)
+  { id:'E1', g:'E', e1:'Allemagne',      e2:'Curaçao',              date:'2026-06-14', j:1 },
+  { id:'E2', g:'E', e1:"Côte d'Ivoire",  e2:'Équateur',             date:'2026-06-14', j:1 },
+  { id:'E3', g:'E', e1:'Allemagne',      e2:"Côte d'Ivoire",        date:'2026-06-19', j:2 },
+  { id:'E4', g:'E', e1:'Curaçao',        e2:'Équateur',             date:'2026-06-19', j:2 },
+  { id:'E5', g:'E', e1:'Allemagne',      e2:'Équateur',             date:'2026-06-28', j:3 },
+  { id:'E6', g:'E', e1:'Curaçao',        e2:"Côte d'Ivoire",        date:'2026-06-28', j:3 },
+
+  // ─── GROUPE F ─── Pays-Bas (e1) · Japon (e2) · Suède (e3) · Tunisie (e4)
+  { id:'F1', g:'F', e1:'Pays-Bas',       e2:'Japon',          date:'2026-06-13', j:1 },
+  { id:'F2', g:'F', e1:'Suède',          e2:'Tunisie',        date:'2026-06-13', j:1 },
+  { id:'F3', g:'F', e1:'Pays-Bas',       e2:'Suède',          date:'2026-06-19', j:2 },
+  { id:'F4', g:'F', e1:'Japon',          e2:'Tunisie',        date:'2026-06-19', j:2 },
+  { id:'F5', g:'F', e1:'Pays-Bas',       e2:'Tunisie',        date:'2026-06-28', j:3 },
+  { id:'F6', g:'F', e1:'Japon',          e2:'Suède',          date:'2026-06-28', j:3 },
+
+  // ─── GROUPE G ─── Belgique (e1) · Égypte (e2) · Iran (e3) · Nlle-Zélande (e4)
+  { id:'G1', g:'G', e1:'Belgique',       e2:'Égypte',         date:'2026-06-15', j:1 },
+  { id:'G2', g:'G', e1:'Iran',           e2:'Nlle-Zélande',   date:'2026-06-15', j:1 },
+  { id:'G3', g:'G', e1:'Belgique',       e2:'Iran',           date:'2026-06-20', j:2 },
+  { id:'G4', g:'G', e1:'Égypte',         e2:'Nlle-Zélande',   date:'2026-06-20', j:2 },
+  { id:'G5', g:'G', e1:'Belgique',       e2:'Nlle-Zélande',   date:'2026-06-29', j:3 },
+  { id:'G6', g:'G', e1:'Égypte',         e2:'Iran',           date:'2026-06-29', j:3 },
+
+  // ─── GROUPE H ─── Espagne (e1) · Cap-Vert (e2) · Arabie saoudite (e3) · Uruguay (e4)
+  { id:'H1', g:'H', e1:'Espagne',        e2:'Cap-Vert',       date:'2026-06-14', j:1 },
+  { id:'H2', g:'H', e1:'Arabie saoudite',e2:'Uruguay',        date:'2026-06-14', j:1 },
+  { id:'H3', g:'H', e1:'Espagne',        e2:'Arabie saoudite',date:'2026-06-20', j:2 },
+  { id:'H4', g:'H', e1:'Cap-Vert',       e2:'Uruguay',        date:'2026-06-20', j:2 },
+  { id:'H5', g:'H', e1:'Espagne',        e2:'Uruguay',        date:'2026-06-29', j:3 },
+  { id:'H6', g:'H', e1:'Cap-Vert',       e2:'Arabie saoudite',date:'2026-06-29', j:3 },
+
+  // ─── GROUPE I ─── France (e1) · Sénégal (e2) · Irak (e3) · Norvège (e4)
+  { id:'I1', g:'I', e1:'France',         e2:'Sénégal',        date:'2026-06-16', j:1 },
+  { id:'I2', g:'I', e1:'Irak',           e2:'Norvège',        date:'2026-06-16', j:1 },
+  { id:'I3', g:'I', e1:'France',         e2:'Irak',           date:'2026-06-21', j:2 },
+  { id:'I4', g:'I', e1:'Sénégal',        e2:'Norvège',        date:'2026-06-21', j:2 },
+  { id:'I5', g:'I', e1:'France',         e2:'Norvège',        date:'2026-06-30', j:3 },
+  { id:'I6', g:'I', e1:'Sénégal',        e2:'Irak',           date:'2026-06-30', j:3 },
+
+  // ─── GROUPE J ─── Argentine (e1) · Algérie (e2) · Autriche (e3) · Jordanie (e4)
+  { id:'J1', g:'J', e1:'Argentine',      e2:'Algérie',        date:'2026-06-15', j:1 },
+  { id:'J2', g:'J', e1:'Autriche',       e2:'Jordanie',       date:'2026-06-15', j:1 },
+  { id:'J3', g:'J', e1:'Argentine',      e2:'Autriche',       date:'2026-06-21', j:2 },
+  { id:'J4', g:'J', e1:'Algérie',        e2:'Jordanie',       date:'2026-06-21', j:2 },
+  { id:'J5', g:'J', e1:'Argentine',      e2:'Jordanie',       date:'2026-07-01', j:3 },
+  { id:'J6', g:'J', e1:'Algérie',        e2:'Autriche',       date:'2026-07-01', j:3 },
+
+  // ─── GROUPE K ─── Portugal (e1) · RD Congo (e2) · Ouzbékistan (e3) · Colombie (e4)
+  { id:'K1', g:'K', e1:'Portugal',       e2:'RD Congo',       date:'2026-06-15', j:1 },
+  { id:'K2', g:'K', e1:'Ouzbékistan',    e2:'Colombie',       date:'2026-06-15', j:1 },
+  { id:'K3', g:'K', e1:'Portugal',       e2:'Ouzbékistan',    date:'2026-06-22', j:2 },
+  { id:'K4', g:'K', e1:'RD Congo',       e2:'Colombie',       date:'2026-06-22', j:2 },
+  { id:'K5', g:'K', e1:'Portugal',       e2:'Colombie',       date:'2026-07-02', j:3 },
+  { id:'K6', g:'K', e1:'RD Congo',       e2:'Ouzbékistan',    date:'2026-07-02', j:3 },
+
+  // ─── GROUPE L ─── Angleterre (e1) · Croatie (e2) · Ghana (e3) · Panama (e4)
+  { id:'L1', g:'L', e1:'Angleterre',     e2:'Croatie',        date:'2026-06-16', j:1 },
+  { id:'L2', g:'L', e1:'Ghana',          e2:'Panama',         date:'2026-06-16', j:1 },
+  { id:'L3', g:'L', e1:'Angleterre',     e2:'Ghana',          date:'2026-06-22', j:2 },
+  { id:'L4', g:'L', e1:'Croatie',        e2:'Panama',         date:'2026-06-22', j:2 },
+  { id:'L5', g:'L', e1:'Angleterre',     e2:'Panama',         date:'2026-07-02', j:3 },
+  { id:'L6', g:'L', e1:'Croatie',        e2:'Ghana',          date:'2026-07-02', j:3 },
+];
+
+// ════════════════════════════════════════════════════════════════════
+// 3. CONSTANTES HÔTES ET BRACKET OFFICIEL (approx. FIFA 2026)
+// ════════════════════════════════════════════════════════════════════
+
+/** Nations hôtes : reçoivent +100 Élo d'avantage à domicile (standard modèles Élo CdM). */
+const NATIONS_HOTES  = new Set(['Mexique', 'États-Unis', 'Canada']);
+const BONUS_DOMICILE = 100;
+
+/**
+ * Bracket des 16èmes de finale.
+ * '1X'=vainqueur groupe X, '2X'=2ème, '3rd_N'=Nème meilleur 3ème (0-indexé).
+ * Distribution : les vainqueurs affrontent les meilleurs 3èmes ;
+ * les 3èmes sont répartis dans les 4 sections du tableau plutôt que regroupés.
+ */
+const BRACKET_R32 = [
+  // Section 1 → QF1 → SF1 → Finale
+  ['1A','3rd_0'], ['1B','2A'],
+  ['1C','3rd_1'], ['1D','2C'],
+  // Section 2 → QF2 → SF1 → Finale
+  ['1E','3rd_2'], ['1F','2E'],
+  ['1G','3rd_3'], ['1H','2G'],
+  // Section 3 → QF3 → SF2 → Finale
+  ['1I','3rd_4'], ['1J','2I'],
+  ['1K','3rd_5'], ['1L','2K'],
+  // Section 4 → QF4 → SF2 → Finale
+  ['2B','3rd_6'], ['2D','3rd_7'],
+  ['2F','2H'],    ['2J','2L'],
+];
+
+// ════════════════════════════════════════════════════════════════════
+// 4. RÉSULTATS & ÉLO DYNAMIQUE
+// ════════════════════════════════════════════════════════════════════
+
+let resultats = {};
+let eloActuel = {};  // Élo courants, mis à jour après chaque résultat réel
+
+function chargerResultats() {
+  try { resultats = JSON.parse(localStorage.getItem('cdm2026_v2') || '{}'); }
+  catch(e) { resultats = {}; }
+}
+function sauvegarderResultats() {
+  localStorage.setItem('cdm2026_v2', JSON.stringify(resultats));
+}
+
+/** Réinitialise puis recalcule eloActuel depuis tous les résultats saisis (ordre chronologique). */
+function recalculerEloActuel() {
+  for (const n of Object.keys(EQUIPES)) eloActuel[n] = EQUIPES[n].elo;
+  const joues = MATCHS_GROUPES
+    .filter(m => resultats[m.id])
+    .sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+  for (const m of joues) {
+    const r = resultats[m.id];
+    _majElo(m.e1, m.e2, r.g1, r.g2);
+  }
+}
+
+/**
+ * Formule de mise à jour Élo après un match.
+ * K = 50 (Coupe du Monde), pondéré par √(|diff buts|), plancher 1 (pour les nuls).
+ */
+function _majElo(n1, n2, g1, g2) {
+  const e1 = eloActuel[n1] ?? EQUIPES[n1]?.elo ?? 1500;
+  const e2 = eloActuel[n2] ?? EQUIPES[n2]?.elo ?? 1500;
+  const att   = 1 / (1 + Math.pow(10, -(e1 - e2) / 400));
+  const res   = g1 > g2 ? 1 : g1 < g2 ? 0 : 0.5;
+  const poids = Math.max(1, Math.sqrt(Math.abs(g1 - g2)));
+  const delta = 50 * poids * (res - att);
+  eloActuel[n1] = e1 + delta;
+  eloActuel[n2] = e2 - delta;
+}
+
+chargerResultats();
+recalculerEloActuel();
+
+/** Élo effectif : Élo courant + bonus domicile si nation hôte. */
+function effElo(nom) {
+  const base = eloActuel[nom] ?? EQUIPES[nom]?.elo ?? 1500;
+  return NATIONS_HOTES.has(nom) ? base + BONUS_DOMICILE : base;
+}
+
+let statsSimulation = null;
+let activeWorker    = null;
+
+// ════════════════════════════════════════════════════════════════════
+// 5. UTILITAIRES
+// ════════════════════════════════════════════════════════════════════
+
+function drapeau(code) {
+  if (!code) return '🏳️';
+  if (code === 'ENG') return '🏴󠁧󠁢󠁥󠁮󠁧󠁿';
+  if (code === 'SCT') return '🏴󠁧󠁢󠁳󠁣󠁴󠁿';
+  return [...code.toUpperCase()].map(c =>
+    String.fromCodePoint(0x1F1E0 + c.charCodeAt(0) - 65)
+  ).join('');
+}
+
+/** Probas vic/nul/def depuis Élo effectifs — utilisé pour l'affichage des matchs. */
+function probsElo(elo1, elo2) {
+  const diff = elo1 - elo2;
+  const e = 1 / (1 + Math.pow(10, -diff / 400));
+  const pN = Math.max(0.04, 0.26 - Math.abs(diff) * 0.00028);
+  const pV = Math.max(0.01, e - pN / 2);
+  const pD = Math.max(0.01, (1-e) - pN / 2);
+  const t  = pV + pN + pD;
+  return { vic: pV/t, nul: pN/t, def: pD/t };
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 6. FONCTIONS SIMULATION (pures — dupliquées dans le Worker)
+// ════════════════════════════════════════════════════════════════════
+
+function poisson(lambda) {
+  if (lambda <= 0) return 0;
+  const L = Math.exp(-Math.min(lambda, 20));
+  let k = 0, p = 1;
+  do { k++; p *= Math.random(); } while (p > L);
+  return k - 1;
+}
+
+/** λ = 1.35 × 10^(ΔÉlo/600), plafonné 0.3–5.0 buts attendus. */
+function simMatch(elo1, elo2) {
+  const l1 = Math.min(5, Math.max(0.3, 1.35 * Math.pow(10, (elo1 - elo2) / 600)));
+  const l2 = Math.min(5, Math.max(0.3, 1.35 * Math.pow(10, (elo2 - elo1) / 600)));
+  return { g1: poisson(l1), g2: poisson(l2) };
+}
+
+/** Éliminatoire : Poisson → tirs au but (coin Élo) si nul. */
+function simKO(elo1, elo2) {
+  const { g1, g2 } = simMatch(elo1, elo2);
+  if (g1 !== g2) return g1 > g2 ? 1 : 2;
+  return Math.random() < 1/(1+Math.pow(10,-(elo1-elo2)/400)) ? 1 : 2;
+}
+
+/** Critères FIFA exacts : pts → diff buts → buts marqués → tirage (aléatoire). */
+function classerGroupe(equipes, scores) {
+  const [e1,e2,e3,e4] = equipes;
+  const pts={}, db={}, bm={};
+  for (const e of equipes) { pts[e]=0; db[e]=0; bm[e]=0; }
+  function app(a,b,ga,gb) {
+    bm[a]+=ga; bm[b]+=gb; db[a]+=ga-gb; db[b]+=gb-ga;
+    if(ga>gb) pts[a]+=3; else if(ga===gb){pts[a]++;pts[b]++;} else pts[b]+=3;
+  }
+  app(e1,e2,scores[0].g1,scores[0].g2); app(e3,e4,scores[1].g1,scores[1].g2);
+  app(e1,e3,scores[2].g1,scores[2].g2); app(e2,e4,scores[3].g1,scores[3].g2);
+  app(e1,e4,scores[4].g1,scores[4].g2); app(e2,e3,scores[5].g1,scores[5].g2);
+  return [...equipes].sort((a,b)=>
+    (pts[b]-pts[a])||(db[b]-db[a])||(bm[b]-bm[a])||(Math.random()-0.5)
+  ).map(e=>({nom:e, pts:pts[e], db:db[e], bm:bm[e]}));
+}
+
+/**
+ * Simule UN tournoi complet.
+ * Prend des paramètres explicites → compatible copie dans Worker.
+ */
+function simulerTournoi(eqs, matchsG, res, eloMap, brkt, hotes, bonusDom) {
+  const getE = n => { const b=eloMap[n]??1500; return hotes.has(n)?b+bonusDom:b; };
+  const LETTRES = 'ABCDEFGHIJKL'.split('');
+  const cl = {};
+  for (const L of LETTRES) {
+    const mbrs = Object.keys(eqs).filter(e=>eqs[e].groupe===L);
+    const ms   = matchsG.filter(m=>m.g===L).sort((a,b)=>a.j-b.j||a.id.localeCompare(b.id));
+    cl[L] = classerGroupe(mbrs, ms.map(m => res[m.id] || simMatch(getE(m.e1), getE(m.e2))));
+  }
+  const top={}, t3=[];
+  for (const L of LETTRES) {
+    top[`1${L}`]=cl[L][0].nom; top[`2${L}`]=cl[L][1].nom;
+    t3.push({...cl[L][2], groupe:L});
+  }
+  // 8 meilleurs 3èmes : pts → db → bm → aléatoire (simule le tirage au sort)
+  const best3 = [...t3]
+    .sort((a,b)=>(b.pts-a.pts)||(b.db-a.db)||(b.bm-a.bm)||(Math.random()-0.5))
+    .slice(0,8).map(t=>t.nom);
+  const perf = {};
+  for (const n of Object.keys(eqs))
+    perf[n]={r32:false,r16:false,qf:false,sf:false,finale:false,vainqueur:false};
+  for (const eq of Object.values(top)) if(perf[eq]) perf[eq].r32=true;
+  for (const eq of best3) if(perf[eq]) perf[eq].r32=true;
+  const resolve = s => s.startsWith('3rd_')?(best3[+s.slice(4)]||null):(top[s]||null);
+  // R32 → R16
+  const vR32 = brkt.map(([s1,s2]) => {
+    const a=resolve(s1), b=resolve(s2);
+    if(!a||!b) return a||b||null;
+    const g=simKO(getE(a),getE(b))===1?a:b;
+    if(perf[g]) perf[g].r16=true; return g;
+  });
+  // Helper : joue un round et marque le stade suivant
+  function round(arr, stg) {
+    const out=[];
+    for(let i=0;i<arr.length/2;i++){
+      const [a,b]=[arr[i*2],arr[i*2+1]];
+      if(!a||!b){out.push(a||b);continue;}
+      const g=simKO(getE(a),getE(b))===1?a:b;
+      if(perf[g]) perf[g][stg]=true; out.push(g);
+    }
+    return out;
+  }
+  const vR16=round(vR32,'qf'), vQF=round(vR16,'sf'), vSF=round(vQF,'finale');
+  const [f1,f2]=vSF;
+  if(f1&&f2){ const g=simKO(getE(f1),getE(f2))===1?f1:f2; if(perf[g]) perf[g].vainqueur=true; }
+  return perf;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 7. SIMULATION MONTE CARLO — WEB WORKER (100 000 itérations)
+// ════════════════════════════════════════════════════════════════════
+
+function lancerSimulation() {
+  if (activeWorker) { activeWorker.terminate(); activeWorker = null; }
+
+  const btn  = document.getElementById('btn-sim');
+  const stat = document.getElementById('sim-status');
+  const bar  = document.getElementById('progress-bar');
+  const fill = document.getElementById('progress-fill');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Simulation en cours…';
+  if (bar)  bar.style.display  = 'block';
+  if (fill) fill.style.width   = '0%';
+  stat.textContent = 'Démarrage…';
+
+  const N     = 100000;
+  const debut = performance.now();
+
+  // Créer le Worker depuis le <script id="worker-src">
+  const src  = document.getElementById('worker-src').textContent;
+  const blob = new Blob([src], { type: 'application/javascript' });
+  const url  = URL.createObjectURL(blob);
+  activeWorker = new Worker(url);
+
+  activeWorker.postMessage({
+    equipes:      EQUIPES,
+    matchsGroupes: MATCHS_GROUPES,
+    resultats,
+    eloActuel:    { ...eloActuel },
+    bracketR32:   BRACKET_R32,
+    nationsHotes: [...NATIONS_HOTES],
+    bonusDomicile: BONUS_DOMICILE,
+    N,
+    batchSize: 5000,
+  });
+
+  activeWorker.onmessage = ev => {
+    if (ev.data.type === 'progress') {
+      const pct = Math.round(ev.data.done / N * 100);
+      if (fill) fill.style.width = pct + '%';
+      stat.textContent = `${ev.data.done.toLocaleString('fr-FR')} / ${N.toLocaleString('fr-FR')}…`;
+    } else if (ev.data.type === 'result') {
+      const duree = ((performance.now() - debut) / 1000).toFixed(1);
+      const nbRes = Object.keys(resultats).length;
+      statsSimulation = ev.data.probs;
+      afficherTableauVictoire(statsSimulation);
+      afficherTableauStades(statsSimulation);
+      afficherGraphique(statsSimulation);
+      afficherBracket(statsSimulation);
+      afficherChartHistorique();
+      for (const L of 'ABCDEFGHIJKL'.split('')) afficherProbsGroupe(L, statsSimulation);
+      remplirTableauElo();
+      // Sauvegarder un snapshot si des résultats réels ont été saisis
+      if (nbRes > 0) sauvegarderSnapshot(statsSimulation);
+      stat.textContent = `100 000 simulations en ${duree}s — ${nbRes} résultat${nbRes>1?'s':''} connu${nbRes>1?'s':''}`;
+      document.getElementById('header-sim-state').textContent = `✓ ${duree}s`;
+      btn.disabled = false;
+      btn.innerHTML = '↺ Relancer la simulation';
+      if (bar) bar.style.display = 'none';
+      activeWorker.terminate(); URL.revokeObjectURL(url); activeWorker = null;
+    }
+  };
+
+  activeWorker.onerror = () => {
+    // Fallback synchrone si le Worker échoue (ex: CSP bloquant les blob URLs)
+    stat.textContent = 'Worker bloqué — simulation synchrone (10 000 it.)…';
+    setTimeout(() => {
+      const c = {};
+      for (const n of Object.keys(EQUIPES)) c[n]={r32:0,r16:0,qf:0,sf:0,finale:0,vainqueur:0};
+      for (let i=0;i<10000;i++){
+        const p=simulerTournoi(EQUIPES,MATCHS_GROUPES,resultats,{...eloActuel},BRACKET_R32,NATIONS_HOTES,BONUS_DOMICILE);
+        for(const [n,v] of Object.entries(p)){if(!c[n])continue;
+          if(v.r32)c[n].r32++;if(v.r16)c[n].r16++;if(v.qf)c[n].qf++;
+          if(v.sf)c[n].sf++;if(v.finale)c[n].finale++;if(v.vainqueur)c[n].vainqueur++;}
+      }
+      const probs={};
+      for(const [n,v] of Object.entries(c))
+        probs[n]={r32:v.r32/10000,r16:v.r16/10000,qf:v.qf/10000,sf:v.sf/10000,finale:v.finale/10000,vainqueur:v.vainqueur/10000};
+      statsSimulation=probs;
+      statsSimulation = probs;
+      afficherTableauVictoire(probs); afficherTableauStades(probs); afficherGraphique(probs);
+      afficherBracket(probs); afficherChartHistorique();
+      for(const L of 'ABCDEFGHIJKL'.split('')) afficherProbsGroupe(L,probs);
+      remplirTableauElo();
+      btn.disabled=false; btn.innerHTML='↺ Relancer la simulation';
+      if(bar) bar.style.display='none';
+    }, 50);
+  };
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 8. INITIALISATION DE L'INTERFACE
+// ════════════════════════════════════════════════════════════════════
+
+let chartFavoris = null;
+let modalMatchId = null;
+
+function init() {
+  const nav    = document.getElementById('main-nav');
+  const main   = document.querySelector('main');
+  const select = document.getElementById('groups-select');
+  const wrap   = document.getElementById('groups-select-wrap');
+
+  for (const L of 'ABCDEFGHIJKL'.split('')) {
+    // Bouton nav desktop
+    const btn = document.createElement('button');
+    btn.textContent = `Groupe ${L}`;
+    btn.setAttribute('data-tab', `groupe-${L}`);
+    btn.className = 'group-nav-btn';
+    btn.onclick = () => showTab(`groupe-${L}`);
+    nav.insertBefore(btn, nav.querySelector('[data-tab="elo"]'));
+
+    // Option select mobile
+    if (select) {
+      const opt = document.createElement('option');
+      opt.value = `groupe-${L}`;
+      opt.textContent = `Groupe ${L}`;
+      // Insert before the "Classement Élo" option
+      const eloOpt = [...select.options].find(o => o.value === 'elo');
+      select.insertBefore(opt, eloOpt);
+    }
+
+    // Panneau
+    const panel = document.createElement('div');
+    panel.id = `panel-groupe-${L}`;
+    panel.className = 'tab-panel';
+    panel.innerHTML = genererGroupeHTML(L);
+    main.appendChild(panel);
+  }
+
+  // Afficher le select sur mobile via CSS, mais on doit aussi rendre le wrapper visible
+  if (wrap) wrap.style.display = 'block';
+
+  remplirTableauElo();
+}
+
+function showTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(`panel-${id}`)?.classList.add('active');
+  document.querySelector(`[data-tab="${id}"]`)?.classList.add('active');
+  // Synchronise le select mobile
+  const sel = document.getElementById('groups-select');
+  if (sel) sel.value = id;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 9. HTML DES GROUPES
+// ════════════════════════════════════════════════════════════════════
+
+function genererGroupeHTML(L) {
+  const matchs = MATCHS_GROUPES.filter(m => m.g === L);
+  const matchsParJ = [1,2,3].map(j => {
+    const lignes = matchs.filter(m => m.j === j).map(m => {
+      const res = resultats[m.id];
+      const jouee = !!res;
+      const scoreStr = jouee ? `${res.g1}–${res.g2}` : '–';
+      const eq1 = EQUIPES[m.e1], eq2 = EQUIPES[m.e2];
+      const elo1 = effElo(m.e1), elo2 = effElo(m.e2);
+      const pr = probsElo(elo1, elo2);
+      const h1 = NATIONS_HOTES.has(m.e1) ? ' 🏠' : '';
+      const h2 = NATIONS_HOTES.has(m.e2) ? '🏠 ' : '';
+      return `<div class="match-row">
+        <div class="match-team">${drapeau(eq1.code)} <span>${m.e1}${h1}</span></div>
+        <div class="match-center">
+          <div class="score-box ${jouee?'played':''}" onclick="ouvrirModal('${m.id}')"
+               title="Cliquer pour saisir le résultat">${scoreStr}</div>
+          <div class="match-date">${formatDate(m.date)}</div>
+          <div class="match-proba">${(pr.vic*100).toFixed(0)}%&nbsp;·&nbsp;${(pr.nul*100).toFixed(0)}%&nbsp;·&nbsp;${(pr.def*100).toFixed(0)}%</div>
+        </div>
+        <div class="match-team right"><span>${h2}${m.e2}</span> ${drapeau(eq2.code)}</div>
+      </div>`;
+    }).join('');
+    return `<div style="margin-bottom:0.5rem">
+      <div style="font-size:0.7rem;color:var(--muted);font-weight:600;margin-bottom:0.25rem;padding:0.25rem 0;border-bottom:1px solid var(--border)">JOURNÉE ${j}</div>
+      ${lignes}</div>`;
+  }).join('');
+
+  return `<div class="card">
+      <div class="card-title">⚽ Groupe ${L} — Calendrier</div>
+      ${matchsParJ}
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">📊 Classement actuel</div>
+        <div id="classement-groupe-${L}">${genererClassementGroupe(L)}</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🎯 Probabilités de qualification</div>
+        <div id="probs-groupe-${L}"><div class="empty" style="padding:1rem 0;font-size:0.75rem">Lancez la simulation…</div></div>
+      </div>
+    </div>`;
+}
+
+function formatDate(iso) {
+  return new Date(iso+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'long'});
+}
+
+function genererClassementGroupe(L) {
+  const equipes = Object.keys(EQUIPES).filter(e => EQUIPES[e].groupe === L);
+  const matchs  = MATCHS_GROUPES.filter(m=>m.g===L).sort((a,b)=>a.j-b.j||a.id.localeCompare(b.id));
+  const st={};
+  for(const e of equipes) st[e]={pts:0,j:0,v:0,n:0,d:0,pb:0,pc:0,db:0};
+  for(const m of matchs){
+    const r=resultats[m.id]; if(!r) continue;
+    st[m.e1].j++; st[m.e2].j++;
+    st[m.e1].pb+=r.g1; st[m.e1].pc+=r.g2; st[m.e2].pb+=r.g2; st[m.e2].pc+=r.g1;
+    st[m.e1].db+=r.g1-r.g2; st[m.e2].db+=r.g2-r.g1;
+    if(r.g1>r.g2){st[m.e1].pts+=3;st[m.e1].v++;st[m.e2].d++;}
+    else if(r.g1===r.g2){st[m.e1].pts++;st[m.e2].pts++;st[m.e1].n++;st[m.e2].n++;}
+    else{st[m.e2].pts+=3;st[m.e2].v++;st[m.e1].d++;}
+  }
+  const cl=[...equipes].sort((a,b)=>(st[b].pts-st[a].pts)||(st[b].db-st[a].db)||(st[b].pb-st[a].pb));
+  const qc=['qual-1','qual-2','qual-3rd',''];
+  return `<table>
+    <thead><tr><th>Équipe</th><th>J</th><th>V</th><th>N</th><th>D</th><th>DB</th><th>Pts</th></tr></thead>
+    <tbody>${cl.map((n,i)=>{
+      const s=st[n], eq=EQUIPES[n];
+      const eloDisp = Math.round(eloActuel[n]??eq.elo);
+      const hote = NATIONS_HOTES.has(n) ? ` <span style="font-size:0.6rem;color:var(--gold)" title="Élo effectif avec +100 domicile = ${eloDisp+BONUS_DOMICILE}">🏠</span>` : '';
+      return `<tr class="${qc[i]||''}">
+        <td><div class="team-cell">${drapeau(eq.code)} ${n}${hote}</div></td>
+        <td>${s.j}</td><td>${s.v}</td><td>${s.n}</td><td>${s.d}</td>
+        <td>${s.db>0?'+':''}${s.db}</td><td><strong>${s.pts}</strong></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>
+  <p style="font-size:0.65rem;color:var(--muted);margin-top:0.5rem">↑ Q1/Q2 = qualifié direct · ↑ ?3 = éventuel meilleur 3ème</p>`;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 10. MODALE DE SAISIE DES RÉSULTATS
+// ════════════════════════════════════════════════════════════════════
+
+function ouvrirModal(matchId) {
+  modalMatchId = matchId;
+  const m=MATCHS_GROUPES.find(x=>x.id===matchId), res=resultats[matchId];
+  const eq1=EQUIPES[m.e1], eq2=EQUIPES[m.e2];
+  document.getElementById('modal-title').textContent=`${drapeau(eq1.code)} ${m.e1}  vs  ${m.e2} ${drapeau(eq2.code)}`;
+  document.getElementById('modal-team1').textContent=`${drapeau(eq1.code)} ${m.e1}`;
+  document.getElementById('modal-team2').textContent=`${m.e2} ${drapeau(eq2.code)}`;
+  document.getElementById('modal-g1').value=res?res.g1:0;
+  document.getElementById('modal-g2').value=res?res.g2:0;
+  document.getElementById('modal-bg').style.display='flex';
+  document.getElementById('modal-g1').focus();
+}
+
+function fermerModal() { document.getElementById('modal-bg').style.display='none'; modalMatchId=null; }
+function closeModal(e) { if(e.target===document.getElementById('modal-bg')) fermerModal(); }
+
+function validerResultat() {
+  if (!modalMatchId) return;
+  const g1=Math.max(0,parseInt(document.getElementById('modal-g1').value)||0);
+  const g2=Math.max(0,parseInt(document.getElementById('modal-g2').value)||0);
+  resultats[modalMatchId]={g1,g2};
+  sauvegarderResultats();
+  recalculerEloActuel();
+  actualiserAffichage();  // relance simulation → snapshot sauvegardé dans le callback
+  fermerModal();
+}
+
+function effacerResultat() {
+  if (!modalMatchId) return;
+  delete resultats[modalMatchId];
+  sauvegarderResultats();
+  recalculerEloActuel();
+  actualiserAffichage();
+  fermerModal();
+}
+
+function actualiserAffichage() {
+  for (const L of 'ABCDEFGHIJKL'.split('')) {
+    const p=document.getElementById(`panel-groupe-${L}`);
+    if(p) p.innerHTML=genererGroupeHTML(L);
+    if(statsSimulation) afficherProbsGroupe(L, statsSimulation);
+  }
+  afficherMatchsDuJour();
+  lancerSimulation();  // relance avec les nouveaux Élo → snapshot sauvé dans le callback
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 11. AFFICHAGE DES RÉSULTATS
+// ════════════════════════════════════════════════════════════════════
+
+function afficherTableauVictoire(stats) {
+  const tb=document.getElementById('tb-victoire');
+  const cl=Object.keys(EQUIPES).sort((a,b)=>stats[b].vainqueur-stats[a].vainqueur).slice(0,16);
+  tb.innerHTML=cl.map((n,i)=>{
+    const eq=EQUIPES[n], pct=(stats[n].vainqueur*100).toFixed(1);
+    const eloDisp=Math.round(effElo(n));
+    const hote=NATIONS_HOTES.has(n)?'&nbsp;🏠':'';
+    const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
+    return `<tr>
+      <td><span class="rank ${rc}">${i+1}</span></td>
+      <td><div class="team-cell">${drapeau(eq.code)} ${n}${hote}</div></td>
+      <td><span class="elo-val">${eloDisp}</span></td>
+      <td><div class="bar-wrap">
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,pct*3)}%"></div></div>
+        <span class="bar-val">${pct}%</span>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function afficherTableauStades(stats) {
+  const tb=document.getElementById('tb-stades');
+  const cl=Object.keys(EQUIPES).sort((a,b)=>stats[b].vainqueur-stats[a].vainqueur);
+  const fmt=v=>v<0.001?'<0.1%':(v*100).toFixed(1)+'%';
+  const col=v=>v>.5?'color:var(--green)':v>.25?'color:var(--blue)':v>.1?'color:var(--gold)':'';
+  tb.innerHTML=cl.map((n,i)=>{
+    const eq=EQUIPES[n], s=stats[n];
+    const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
+    return `<tr>
+      <td><span class="rank ${rc}">${i+1}</span></td>
+      <td><div class="team-cell">${drapeau(eq.code)} ${n}</div></td>
+      <td style="${col(s.r32)}">${fmt(s.r32)}</td>
+      <td style="${col(s.r16)}">${fmt(s.r16)}</td>
+      <td style="${col(s.qf)}">${fmt(s.qf)}</td>
+      <td style="${col(s.sf)}">${fmt(s.sf)}</td>
+      <td style="${col(s.finale)}">${fmt(s.finale)}</td>
+      <td style="${col(s.vainqueur)}"><strong>${fmt(s.vainqueur)}</strong></td>
+    </tr>`;
+  }).join('');
+}
+
+function afficherGraphique(stats) {
+  const top8=Object.keys(EQUIPES).sort((a,b)=>stats[b].vainqueur-stats[a].vainqueur).slice(0,8);
+  const labels=top8.map(n=>`${drapeau(EQUIPES[n].code)} ${n}`);
+  const data=top8.map(n=>+(stats[n].vainqueur*100).toFixed(2));
+  const colors=['#f0c040','#e94560','#58a6ff','#3fb950','#bc8cff','#f97583','#79c0ff','#56d364'];
+  const ctx=document.getElementById('chart-favoris').getContext('2d');
+  if(chartFavoris) chartFavoris.destroy();
+  chartFavoris=new Chart(ctx,{
+    type:'bar',
+    data:{labels,datasets:[{label:'Prob. victoire (%)',data,backgroundColor:colors,borderRadius:5,borderSkipped:false}]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw.toFixed(2)}%`}}},
+      scales:{
+        x:{ticks:{color:'#8b949e',font:{size:11}},grid:{color:'rgba(255,255,255,0.04)'}},
+        y:{ticks:{color:'#8b949e',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.06)'}}
+      }
+    }
+  });
+}
+
+function afficherProbsGroupe(L, stats) {
+  const div=document.getElementById(`probs-groupe-${L}`); if(!div) return;
+  const eqs=Object.keys(EQUIPES).filter(e=>EQUIPES[e].groupe===L).sort((a,b)=>stats[b].r32-stats[a].r32);
+  const fmt=v=>(v*100).toFixed(1)+'%';
+  // Couleur de la barre selon la probabilité de qualification (r32)
+  const barCls = v => v > 0.70 ? 'q-hi' : v > 0.30 ? 'q-md' : 'q-lo';
+
+  div.innerHTML=`<table>
+    <thead><tr><th>Équipe</th><th>16èmes</th><th>8èmes</th><th>Quarts</th><th>Demies</th><th>🏆</th></tr></thead>
+    <tbody>${eqs.map(n=>{
+      const eq=EQUIPES[n], s=stats[n];
+      const pct=Math.round(s.r32*100);
+      const cls=barCls(s.r32);
+      return `<tr>
+        <td><div class="team-cell">${drapeau(eq.code)} ${n}</div></td>
+        <td><div class="bar-wrap">
+          <div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
+          <span style="min-width:2.5rem;text-align:right;font-size:0.78rem;font-weight:600;color:${s.r32>.7?'var(--green)':s.r32>.3?'#fd9644':'var(--accent)'}">${fmt(s.r32)}</span>
+        </div></td>
+        <td style="font-size:0.78rem">${fmt(s.r16)}</td>
+        <td style="font-size:0.78rem">${fmt(s.qf)}</td>
+        <td style="font-size:0.78rem">${fmt(s.sf)}</td>
+        <td style="font-size:0.78rem;font-weight:700;color:var(--gold)">${fmt(s.vainqueur)}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 12. CLASSEMENT ÉLO (avec Élo dynamiques mis à jour)
+// ════════════════════════════════════════════════════════════════════
+
+function remplirTableauElo() {
+  const tb=document.getElementById('tb-elo');
+  const cl=Object.keys(EQUIPES).sort((a,b)=>effElo(b)-effElo(a));
+  tb.innerHTML=cl.map((n,i)=>{
+    const eq=EQUIPES[n];
+    const eloBase=Math.round(eloActuel[n]??eq.elo);
+    const eloEff=Math.round(effElo(n));
+    const delta=eloBase-eq.elo;
+    const deltaStr=delta!==0?` <span style="font-size:0.65rem;color:${delta>0?'var(--green)':'var(--accent)'}">${delta>0?'+':''}${Math.round(delta)}</span>`:'';
+    const hoteStr=NATIONS_HOTES.has(n)?` <span style="font-size:0.65rem;color:var(--gold)" title="Élo effectif: ${eloEff}">🏠</span>`:'';
+    const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
+    return `<tr>
+      <td><span class="rank ${rc}">${i+1}</span></td>
+      <td><div class="team-cell">${drapeau(eq.code)} ${n}${hoteStr}</div></td>
+      <td><span style="font-size:0.7rem;color:var(--muted)">Grp.${eq.groupe}</span></td>
+      <td><span class="confed-badge">${eq.confed}</span></td>
+      <td><span class="elo-val">${eloBase}</span>${deltaStr}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 13. THÈME CLAIR / SOMBRE
+// ════════════════════════════════════════════════════════════════════
+
+function initTheme() {
+  const saved = localStorage.getItem('cdm2026_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  document.getElementById('theme-btn').textContent = saved === 'dark' ? '🌙' : '☀️';
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next    = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('cdm2026_theme', next);
+  document.getElementById('theme-btn').textContent = next === 'dark' ? '🌙' : '☀️';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 14. MATCHS DU JOUR / DEMAIN
+// ════════════════════════════════════════════════════════════════════
+
+function afficherMatchsDuJour() {
+  const now      = new Date();
+  const todayStr = now.toISOString().slice(0,10);
+  const tom      = new Date(now); tom.setDate(tom.getDate()+1);
+  const tomStr   = tom.toISOString().slice(0,10);
+
+  const banner = document.getElementById('today-banner');
+  const list   = document.getElementById('today-matches-list');
+  if (!banner || !list) return;
+
+  const matchsAujourd = MATCHS_GROUPES.filter(m => m.date === todayStr);
+  const matchsDemain  = MATCHS_GROUPES.filter(m => m.date === tomStr);
+  const all = [...matchsAujourd.map(m=>({m,tag:'today'})), ...matchsDemain.map(m=>({m,tag:'demain'}))];
+
+  if (all.length === 0) { banner.style.display = 'none'; return; }
+  banner.style.display = 'block';
+
+  list.innerHTML = all.map(({m, tag}) => {
+    const res = resultats[m.id];
+    const eq1 = EQUIPES[m.e1], eq2 = EQUIPES[m.e2];
+    const elo1 = effElo(m.e1), elo2 = effElo(m.e2);
+    const pr = probsElo(elo1, elo2);
+    const tagHTML = tag === 'today'
+      ? `<span class="tag-today">Aujourd'hui</span>`
+      : `<span class="tag-demain">Demain</span>`;
+    const footer = res
+      ? `<div class="played-ok">✓ ${res.g1}–${res.g2}</div>`
+      : `<button class="btn-quick" onclick="ouvrirModal('${m.id}')">Saisir résultat</button>`;
+    return `<div class="today-card">
+      <div class="today-card-head">${tagHTML}<span style="font-size:0.6rem;color:var(--muted)">Grp.${m.g}</span></div>
+      <div class="today-teams">
+        <span>${drapeau(eq1.code)}&nbsp;${m.e1}</span>
+        <span class="today-vs">vs</span>
+        <span>${m.e2}&nbsp;${drapeau(eq2.code)}</span>
+      </div>
+      <div class="today-probas">
+        <span>${(pr.vic*100).toFixed(0)}%</span><span>·</span>
+        <span>${(pr.nul*100).toFixed(0)}%</span><span>·</span>
+        <span>${(pr.def*100).toFixed(0)}%</span>
+      </div>
+      ${footer}
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 15. TABLEAU FINAL (BRACKET)
+// ════════════════════════════════════════════════════════════════════
+
+/**
+ * Calcule le bracket attendu par propagation Élo greedy.
+ * Retourne un tableau de rounds : [R32[16], R16[8], QF[4], SF[2], F[1]]
+ * Chaque match : { t1, t2, p1 (prob t1 gagne), winner }
+ */
+function computeExpectedBracket() {
+  // Classement attendu par groupe (standing réel + Élo pour les matchs non joués)
+  const grp = {};
+  for (const L of 'ABCDEFGHIJKL'.split('')) {
+    const teams  = Object.keys(EQUIPES).filter(e => EQUIPES[e].groupe === L);
+    const matchs = MATCHS_GROUPES.filter(m => m.g === L);
+    const joues  = matchs.filter(m => resultats[m.id]).length;
+    if (joues > 0) {
+      const st = {};
+      for (const e of teams) st[e] = { pts:0, db:0, bm:0 };
+      for (const m of matchs) {
+        const r = resultats[m.id]; if (!r) continue;
+        const [a,b,ga,gb] = [m.e1, m.e2, r.g1, r.g2];
+        st[a].pts += ga>gb?3:ga===gb?1:0; st[b].pts += gb>ga?3:ga===gb?1:0;
+        st[a].db+=ga-gb; st[b].db+=gb-ga; st[a].bm+=ga; st[b].bm+=gb;
+      }
+      grp[L] = [...teams].sort((a,b)=>(st[b].pts-st[a].pts)||(st[b].db-st[a].db)||(st[b].bm-st[a].bm)||(effElo(b)-effElo(a)));
+    } else {
+      grp[L] = [...teams].sort((a,b) => effElo(b)-effElo(a));
+    }
+  }
+
+  // 8 meilleurs 3es (par Élo effectif)
+  const thirds = 'ABCDEFGHIJKL'.split('').map(L => grp[L][2])
+    .sort((a,b) => effElo(b)-effElo(a)).slice(0,8);
+
+  const slotTeam = s => {
+    if (s.startsWith('3rd_')) return thirds[+s.slice(4)] ?? '?';
+    return (grp[s[1]] ?? [])[s[0]==='1'?0:1] ?? '?';
+  };
+
+  const rounds = [];
+  let cur = BRACKET_R32.map(([s1,s2]) => {
+    const t1=slotTeam(s1), t2=slotTeam(s2);
+    const p = probsElo(effElo(t1), effElo(t2));
+    return { t1, t2, p1:p.vic, winner:p.vic>=0.5?t1:t2 };
+  });
+  rounds.push(cur);
+
+  while (cur.length > 1) {
+    const next = [];
+    for (let i=0; i<cur.length; i+=2) {
+      const [a,b] = [cur[i].winner, cur[i+1]?.winner ?? cur[i].winner];
+      const p = probsElo(effElo(a), effElo(b));
+      next.push({ t1:a, t2:b, p1:p.vic, winner:p.vic>=0.5?a:b });
+    }
+    rounds.push(next); cur = next;
+  }
+  return rounds;
+}
+
+function afficherBracket(stats) {
+  const el = document.getElementById('bracket-content');
+  if (!el) return;
+
+  const rounds = computeExpectedBracket();
+  const stageKeys  = ['r32','r16','qf','sf','finale','vainqueur'];
+  const roundNames = ['16èmes','8èmes','Quarts','Demies','Finale'];
+
+  const colsHTML = rounds.map((matches, ri) => {
+    const stageKey = stageKeys[Math.min(ri+1, stageKeys.length-1)];
+
+    // Grouper les matchs par paires pour dessiner les lignes verticales
+    const pairesHTML = [];
+    for (let i=0; i<matches.length; i+=2) {
+      const pair = matches.slice(i, i+2);
+      const matchesHTML = pair.map(m => {
+        const eq1 = EQUIPES[m.t1], eq2 = EQUIPES[m.t2];
+        const s1  = stats?.[m.t1], s2 = stats?.[m.t2];
+        const p1  = s1 ? s1[stageKey] : 0;
+        const p2  = s2 ? s2[stageKey] : 0;
+        const pctCls = v => v > 0.5 ? 'hi' : v > 0.2 ? 'md' : '';
+        return `<div class="b-group">
+          <div class="b-match-box">
+            <div class="b-team${m.winner===m.t1?' fav':''}">
+              <span class="b-name">${eq1?drapeau(eq1.code):''} ${m.t1}</span>
+              <span class="b-pct ${pctCls(p1)}">${stats?Math.round(p1*100)+'%':''}</span>
+            </div>
+            <div class="b-team${m.winner===m.t2?' fav':''}">
+              <span class="b-name">${eq2?drapeau(eq2.code):''} ${m.t2}</span>
+              <span class="b-pct ${pctCls(p2)}">${stats?Math.round(p2*100)+'%':''}</span>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+      // Si on a bien 2 matchs, enrober dans .b-pair pour les lignes verticales
+      pairesHTML.push(pair.length===2 ? `<div class="b-pair">${matchesHTML}</div>` : matchesHTML);
+    }
+
+    return `<div class="b-col">
+      <div class="b-col-hd">${roundNames[ri]}</div>
+      <div class="b-slots">${pairesHTML.join('')}</div>
+    </div>`;
+  }).join('');
+
+  // Colonne champion
+  const champion = rounds[rounds.length-1][0].winner;
+  const champSt  = stats?.[champion];
+  const champPct = champSt ? (champSt.vainqueur*100).toFixed(1)+'%' : '';
+  const champCol = `<div class="b-col" style="min-width:100px;max-width:110px">
+    <div class="b-col-hd">🏆</div>
+    <div class="b-slots">
+      <div class="b-champion">
+        <div class="b-trophy">🏆</div>
+        <div class="b-champ-name">${EQUIPES[champion]?drapeau(EQUIPES[champion].code):''} ${champion}</div>
+        ${champSt?`<div class="b-champ-pct">${champPct}</div>`:''}
+      </div>
+    </div>
+  </div>`;
+
+  el.innerHTML = `<div class="bracket-outer"><div class="bracket-inner">${colsHTML}${champCol}</div></div>`;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 16. HISTORIQUE DES PROBABILITÉS
+// ════════════════════════════════════════════════════════════════════
+
+let historiqueProbs = [];
+let chartHistorique = null;
+
+function chargerHistorique() {
+  try { historiqueProbs = JSON.parse(localStorage.getItem('cdm2026_hist') || '[]'); }
+  catch(e) { historiqueProbs = []; }
+}
+
+/**
+ * Sauvegarde un snapshot après chaque résultat saisi.
+ * Chaque snapshot = { n: nbMatchsJoues, probs: { [equipe]: probVictoire } }
+ */
+function sauvegarderSnapshot(stats) {
+  if (!stats) return;
+  const n = Object.keys(resultats).length;
+  // Toujours garder les 8 mêmes équipes de référence (top 8 initial par Élo)
+  const top8 = Object.keys(EQUIPES).sort((a,b)=>EQUIPES[b].elo-EQUIPES[a].elo).slice(0,8);
+  const snap = { n, probs: {} };
+  for (const eq of top8) snap.probs[eq] = +(stats[eq]?.vainqueur ?? 0).toFixed(4);
+  // Éviter les doublons pour le même nombre de matchs
+  historiqueProbs = historiqueProbs.filter(s => s.n !== n);
+  historiqueProbs.push(snap);
+  historiqueProbs.sort((a,b) => a.n - b.n);
+  localStorage.setItem('cdm2026_hist', JSON.stringify(historiqueProbs));
+}
+
+function afficherChartHistorique() {
+  const card = document.getElementById('card-historique');
+  if (!card || historiqueProbs.length < 2) { if(card) card.style.display='none'; return; }
+  card.style.display = 'block';
+
+  const top8 = Object.keys(EQUIPES).sort((a,b)=>EQUIPES[b].elo-EQUIPES[a].elo).slice(0,8);
+  const labels = historiqueProbs.map(s => `${s.n} match${s.n>1?'s':''}`);
+  const colors = ['#f0c040','#e94560','#58a6ff','#3fb950','#bc8cff','#f97583','#79c0ff','#56d364'];
+
+  const datasets = top8.map((eq,i) => ({
+    label: `${drapeau(EQUIPES[eq].code)} ${eq}`,
+    data: historiqueProbs.map(s => +((s.probs[eq] ?? 0)*100).toFixed(2)),
+    borderColor: colors[i],
+    backgroundColor: colors[i]+'22',
+    borderWidth: 2,
+    pointRadius: 4,
+    tension: 0.3,
+    fill: false,
+  }));
+
+  const ctx = document.getElementById('chart-historique').getContext('2d');
+  if (chartHistorique) chartHistorique.destroy();
+  chartHistorique = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position:'right', labels:{ color:'#8b949e', boxWidth:10, font:{size:11} } },
+        tooltip: { callbacks:{ label: c=>`${c.dataset.label}: ${c.raw.toFixed(2)}%` } }
+      },
+      scales: {
+        x: { ticks:{color:'#8b949e'}, grid:{color:'rgba(255,255,255,0.05)'} },
+        y: { ticks:{color:'#8b949e',callback:v=>v+'%'}, grid:{color:'rgba(255,255,255,0.07)'} }
+      }
+    }
+  });
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 13. DÉMARRAGE
+// ════════════════════════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', () => {
+  chargerHistorique();
+  initTheme();
+  init();
+  afficherMatchsDuJour();
+  lancerSimulation();
+});
+</script>
+</body>
+</html>
