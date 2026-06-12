@@ -318,6 +318,11 @@
     .prono-toggle:hover { color:var(--text); }
     .date-separator { font-size:0.68rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; padding:0.4rem 0 0.2rem; border-bottom:1px solid var(--border); margin-bottom:0.5rem; }
     .prono-lambda { font-size:0.6rem; color:var(--muted); }
+    /* ── BADGES BOOKMAKERS ── */
+    .bk-badge    { font-size:0.58rem; font-weight:700; padding:0.1rem 0.4rem; border-radius:0.25rem; white-space:nowrap; flex-shrink:0; }
+    .bk-ok       { background:rgba(88,166,255,0.15); color:var(--blue); }
+    .bk-model    { background:rgba(139,148,158,0.1);  color:var(--muted); }
+    .odds-ts     { font-size:0.58rem; color:var(--muted); opacity:0.7; }
   </style>
 </head>
 <body>
@@ -517,14 +522,19 @@ function classerGroupe(equipes, scores) {
   ).map(e => ({ nom:e, pts:pts[e], db:db[e], bm:bm[e] }));
 }
 
-function simulerTournoi(eqs, matchsG, res, eloMap, brkt, hotes, bonusDom) {
+function simulerTournoi(eqs, matchsG, res, eloMap, brkt, hotes, bonusDom, calibLambdas) {
   const getE = n => { const b = eloMap[n]??1500; return hotes.has(n) ? b+bonusDom : b; };
   const LETTRES = 'ABCDEFGHIJKL'.split('');
   const cl = {};
   for (const L of LETTRES) {
     const mbrs = Object.keys(eqs).filter(e => eqs[e].groupe === L);
     const ms   = matchsG.filter(m=>m.g===L).sort((a,b)=>a.j-b.j||a.id.localeCompare(b.id));
-    cl[L] = classerGroupe(mbrs, ms.map(m => res[m.id] || simMatch(getE(m.e1), getE(m.e2))));
+    cl[L] = classerGroupe(mbrs, ms.map(m => {
+      if (res[m.id]) return res[m.id];
+      const cal = calibLambdas?.[m.id];
+      if (cal) return simMatch(cal.lam1, cal.lam2); // λ calibrés (bookmakers)
+      return simMatch(getE(m.e1), getE(m.e2));       // λ Élo pur
+    }));
   }
   const top={}, t3=[];
   for (const L of LETTRES) {
@@ -563,7 +573,7 @@ function simulerTournoi(eqs, matchsG, res, eloMap, brkt, hotes, bonusDom) {
 /* Handler principal du Worker */
 self.onmessage = function(ev) {
   const { equipes, matchsGroupes, resultats, eloActuel,
-          bracketR32, nationsHotes, bonusDomicile, N, batchSize } = ev.data;
+          bracketR32, nationsHotes, bonusDomicile, calibLambdas, N, batchSize } = ev.data;
   const HOTES = new Set(nationsHotes);
   const cpts = {};
   for (const n of Object.keys(equipes))
@@ -573,7 +583,7 @@ self.onmessage = function(ev) {
     const end = Math.min(done + batchSize, N);
     while (done < end) {
       const p = simulerTournoi(equipes, matchsGroupes, resultats, eloActuel,
-                               bracketR32, HOTES, bonusDomicile);
+                               bracketR32, HOTES, bonusDomicile, calibLambdas);
       for (const [n, v] of Object.entries(p)) {
         if (!cpts[n]) continue;
         if(v.r32)cpts[n].r32++; if(v.r16)cpts[n].r16++;
@@ -900,9 +910,14 @@ let activeWorker    = null;
 
 // ── Cache de simulation (localStorage) ─────────────────────────────
 
-/** Empreinte de l'état courant (résultats saisis) pour valider le cache. */
+/**
+ * Empreinte de l'état courant pour valider le cache.
+ * Inclut les résultats ET un résumé des cotes disponibles :
+ * si les cotes changent, le cache est invalidé et la simulation relancée.
+ */
 function hashEtatActuel() {
-  return JSON.stringify(resultats);
+  const cotesKey = Object.keys(cotesParMatch).sort().join(',');
+  return JSON.stringify(resultats) + '|' + cotesKey;
 }
 
 function sauvegarderCacheSim(stats) {
@@ -1011,15 +1026,21 @@ function classerGroupe(equipes, scores) {
 /**
  * Simule UN tournoi complet.
  * Prend des paramètres explicites → compatible copie dans Worker.
+ * calibLambdas : dict { matchId: {lam1, lam2} } pour les λ calibrés bookmakers.
  */
-function simulerTournoi(eqs, matchsG, res, eloMap, brkt, hotes, bonusDom) {
+function simulerTournoi(eqs, matchsG, res, eloMap, brkt, hotes, bonusDom, calibLambdas) {
   const getE = n => { const b=eloMap[n]??1500; return hotes.has(n)?b+bonusDom:b; };
   const LETTRES = 'ABCDEFGHIJKL'.split('');
   const cl = {};
   for (const L of LETTRES) {
     const mbrs = Object.keys(eqs).filter(e=>eqs[e].groupe===L);
     const ms   = matchsG.filter(m=>m.g===L).sort((a,b)=>a.j-b.j||a.id.localeCompare(b.id));
-    cl[L] = classerGroupe(mbrs, ms.map(m => res[m.id] || simMatch(getE(m.e1), getE(m.e2))));
+    cl[L] = classerGroupe(mbrs, ms.map(m => {
+      if (res[m.id]) return res[m.id];
+      const cal = calibLambdas?.[m.id];
+      if (cal) return simMatch(cal.lam1, cal.lam2);
+      return simMatch(getE(m.e1), getE(m.e2));
+    }));
   }
   const top={}, t3=[];
   for (const L of LETTRES) {
@@ -1104,10 +1125,14 @@ function lancerSimulation(forcer = false) {
   const url  = URL.createObjectURL(blob);
   activeWorker = new Worker(url);
 
+  // Pré-calcule les λ calibrés (bookmakers + modèle) pour chaque match à venir
+  const calibLambdas = preparerCalibLambdas();
+
   activeWorker.postMessage({
     equipes: EQUIPES, matchsGroupes: MATCHS_GROUPES, resultats,
     eloActuel: { ...eloActuel }, bracketR32: BRACKET_R32,
     nationsHotes: [...NATIONS_HOTES], bonusDomicile: BONUS_DOMICILE,
+    calibLambdas,   // ← λ calibrés pour que le MC bénéficie des cotes bookmakers
     N, batchSize: 5000,
   });
 
@@ -1139,7 +1164,7 @@ function lancerSimulation(forcer = false) {
       const c = {};
       for (const n of Object.keys(EQUIPES)) c[n]={r32:0,r16:0,qf:0,sf:0,finale:0,vainqueur:0};
       for (let i=0;i<10000;i++){
-        const p=simulerTournoi(EQUIPES,MATCHS_GROUPES,resultats,{...eloActuel},BRACKET_R32,NATIONS_HOTES,BONUS_DOMICILE);
+        const p=simulerTournoi(EQUIPES,MATCHS_GROUPES,resultats,{...eloActuel},BRACKET_R32,NATIONS_HOTES,BONUS_DOMICILE,preparerCalibLambdas());
         for(const [n,v] of Object.entries(p)){if(!c[n])continue;
           if(v.r32)c[n].r32++;if(v.r16)c[n].r16++;if(v.qf)c[n].qf++;
           if(v.sf)c[n].sf++;if(v.finale)c[n].finale++;if(v.vainqueur)c[n].vainqueur++;}
@@ -1669,16 +1694,20 @@ function predictMatch(lam1, lam2) {
 
 /**
  * Obtient le pronostic complet pour un match de groupe (par ID ou objet match).
+ * Utilise les λ calibrés (fusion bookmakers + modèle si cotes disponibles).
  */
 function getPronostic(matchOrId) {
   const m = typeof matchOrId==='string' ? MATCHS_GROUPES.find(x=>x.id===matchOrId) : matchOrId;
   if (!m) return null;
-  const { hf1, hf2, enjeu } = getContextFactors(m);
-  const ad1 = attackDef[m.e1] ?? { att:1, def:1 };
-  const ad2 = attackDef[m.e2] ?? { att:1, def:1 };
-  const lam1 = Math.min(4.5, Math.max(0.2, ad1.att * ad2.def * MU_GOALS * hf1 * enjeu));
-  const lam2 = Math.min(4.5, Math.max(0.2, ad2.att * ad1.def * MU_GOALS * hf2 * enjeu));
-  return predictMatch(lam1, lam2);
+  const { lam1, lam2, source, fusWin, fusDraw, fusLoss } = getCalibratedLambdas(m);
+  const pr = predictMatch(lam1, lam2);
+  // Surcharger V/N/D avec les probabilités fusionnées si cotes disponibles
+  if (source === 'bookmakers') {
+    pr.pWin  = fusWin;
+    pr.pDraw = fusDraw;
+    pr.pLoss = fusLoss;
+  }
+  return { ...pr, source };
 }
 
 // ─── Rendu compact (dans les onglets de groupe) ──────────────────────
@@ -1700,11 +1729,14 @@ function renderPronoCompact(m) {
     return `<div class="inline-prono">Prono&nbsp;<strong>${pr.best.g1}–${pr.best.g2}</strong>&nbsp;${badge}</div>`;
   }
 
-  // Match à venir : afficher prédiction + lien "détail"
+  // Match à venir : badge source + prédiction + détail dépliable
+  const bkBadge = pr.source === 'bookmakers'
+    ? `<span class="bk-badge bk-ok">📊 calibré</span>`
+    : `<span class="bk-badge bk-model">🧮 modèle</span>`;
   return `<div class="inline-prono">
     <span class="prono-score-badge">🎯 ${pr.best.g1}-${pr.best.g2}</span>
     <span>V:${(pr.pWin*100).toFixed(0)}% N:${(pr.pDraw*100).toFixed(0)}% D:${(pr.pLoss*100).toFixed(0)}%</span>
-    <span class="prono-lambda">λ=${pr.lam1.toFixed(1)}+${pr.lam2.toFixed(1)}</span>
+    ${bkBadge}
     <button class="prono-toggle" onclick="togglePronoDetail('${m.id}')">▼ détail</button>
   </div>
   <div class="prono-card prono-card-collapsed" id="pd-${m.id}">
@@ -1765,11 +1797,16 @@ function renderPronoCard(m, pr) {
   // Buts attendus et O/U
   const totG = (pr.lam1+pr.lam2).toFixed(2);
 
+  const sourceLine = pr.source === 'bookmakers'
+    ? `<span class="bk-badge bk-ok" style="margin-left:0.5rem">📊 calibré bookmakers</span>` +
+      (cotesTs ? `<span class="odds-ts" style="margin-left:0.5rem">· cotes du ${cotesTs.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</span>` : '')
+    : `<span class="bk-badge bk-model" style="margin-left:0.5rem">🧮 modèle seul</span>`;
+
   return `<div>
     <div class="prono-best-score">${pr.best.g1}-${pr.best.g2}
       <span style="font-size:0.75rem;color:var(--muted);font-weight:400;margin-left:0.5rem">${(pr.best.p*100).toFixed(1)}%</span>
     </div>
-    <div class="prono-best-sub">Score le plus probable · λ₁=${pr.lam1.toFixed(2)} · λ₂=${pr.lam2.toFixed(2)} · total=${totG}</div>
+    <div class="prono-best-sub">Score le plus probable · λ₁=${pr.lam1.toFixed(2)} · λ₂=${pr.lam2.toFixed(2)} · total=${totG} ${sourceLine}</div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem">
       <div>
@@ -1920,6 +1957,262 @@ function afficherPronostics() {
   }
 
   el.innerHTML = html || '<div class="empty"><div class="empty-icon">🎯</div>Aucun match trouvé</div>';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 18. CALIBRATION BOOKMAKERS — THE ODDS API
+// ════════════════════════════════════════════════════════════════════
+
+/**
+ * Table de correspondance noms anglais (The Odds API) → noms français du site.
+ * La clé est toujours en anglais (tel que renvoyé par l'API).
+ */
+const NOMS_API = {
+  // Groupe A
+  'Mexico':                         'Mexique',
+  'South Africa':                   'Afrique du Sud',
+  'South Korea':                    'Corée du Sud',
+  'Czech Republic':                 'Tchéquie',
+  'Czechia':                        'Tchéquie',
+  // Groupe B
+  'Canada':                         'Canada',
+  'Bosnia and Herzegovina':         'Bosnie-Herzég.',
+  'Bosnia & Herzegovina':           'Bosnie-Herzég.',
+  'Qatar':                          'Qatar',
+  'Switzerland':                    'Suisse',
+  // Groupe C
+  'Brazil':                         'Brésil',
+  'Morocco':                        'Maroc',
+  'Haiti':                          'Haïti',
+  'Scotland':                       'Écosse',
+  // Groupe D
+  'United States':                  'États-Unis',
+  'USA':                            'États-Unis',
+  'Paraguay':                       'Paraguay',
+  'Australia':                      'Australie',
+  'Turkey':                         'Turquie',
+  // Groupe E
+  'Germany':                        'Allemagne',
+  'Curacao':                        'Curaçao',
+  "Ivory Coast":                    "Côte d'Ivoire",
+  "Cote d'Ivoire":                  "Côte d'Ivoire",
+  'Ecuador':                        'Équateur',
+  // Groupe F
+  'Netherlands':                    'Pays-Bas',
+  'Japan':                          'Japon',
+  'Sweden':                         'Suède',
+  'Tunisia':                        'Tunisie',
+  // Groupe G
+  'Belgium':                        'Belgique',
+  'Egypt':                          'Égypte',
+  'Iran':                           'Iran',
+  'New Zealand':                    'Nlle-Zélande',
+  // Groupe H
+  'Spain':                          'Espagne',
+  'Cape Verde':                     'Cap-Vert',
+  'Saudi Arabia':                   'Arabie saoudite',
+  'Uruguay':                        'Uruguay',
+  // Groupe I
+  'France':                         'France',
+  'Senegal':                        'Sénégal',
+  'Iraq':                           'Irak',
+  'Norway':                         'Norvège',
+  // Groupe J
+  'Argentina':                      'Argentine',
+  'Algeria':                        'Algérie',
+  'Austria':                        'Autriche',
+  'Jordan':                         'Jordanie',
+  // Groupe K
+  'Portugal':                       'Portugal',
+  'DR Congo':                       'RD Congo',
+  'Democratic Republic of Congo':   'RD Congo',
+  'Uzbekistan':                     'Ouzbékistan',
+  'Colombia':                       'Colombie',
+  // Groupe L
+  'England':                        'Angleterre',
+  'Croatia':                        'Croatie',
+  'Ghana':                          'Ghana',
+  'Panama':                         'Panama',
+};
+
+/** Cotes disponibles par ID de match. { matchId: { win, draw, loss } } */
+let cotesParMatch = {};
+/** Timestamp de la dernière mise à jour réussie des cotes. */
+let cotesTs       = null;
+
+/**
+ * Convertit trois cotes décimales (home, draw, away) en probabilités normalisées.
+ * La normalisation retire la marge du bookmaker (overround).
+ */
+function normaliserCotes(home, draw, away) {
+  const rH = 1 / home, rD = 1 / draw, rA = 1 / away;
+  const sum = rH + rD + rA;
+  return { win: rH / sum, draw: rD / sum, loss: rA / sum };
+}
+
+/**
+ * Résout la correspondance entre un nom anglais de l'API et un nom français du site.
+ * Essaie d'abord la table NOMS_API, puis une recherche insensible à la casse.
+ */
+function trouverNomFR(nomEN) {
+  if (NOMS_API[nomEN]) return NOMS_API[nomEN];
+  // Recherche approximative (insensible à la casse, sans accents)
+  const simplifier = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const cible = simplifier(nomEN);
+  return Object.keys(EQUIPES).find(n => simplifier(n) === cible) ?? null;
+}
+
+/**
+ * Traite la réponse brute de The Odds API et peuple `cotesParMatch`.
+ * Retourne true si au moins une cote a été trouvée.
+ */
+function traiterCotes(apiData) {
+  const nouveau = {};
+
+  for (const evt of apiData) {
+    const nom1FR = trouverNomFR(evt.home_team);
+    const nom2FR = trouverNomFR(evt.away_team);
+    if (!nom1FR || !nom2FR) continue;
+
+    // Trouver le match dans notre calendrier (dans les deux sens)
+    const m = MATCHS_GROUPES.find(x =>
+      (x.e1 === nom1FR && x.e2 === nom2FR) ||
+      (x.e1 === nom2FR && x.e2 === nom1FR)
+    );
+    if (!m) continue;
+
+    // Calculer la cote moyenne sur tous les bookmakers disponibles
+    let sH = 0, sD = 0, sA = 0, n = 0;
+    for (const bk of (evt.bookmakers ?? [])) {
+      const h2h = bk.markets?.find(mk => mk.key === 'h2h');
+      if (!h2h) continue;
+      const oHome = h2h.outcomes?.find(o => o.name === evt.home_team);
+      const oDraw = h2h.outcomes?.find(o => o.name === 'Draw');
+      const oAway = h2h.outcomes?.find(o => o.name === evt.away_team);
+      if (!oHome || !oDraw || !oAway) continue;
+      sH += oHome.price; sD += oDraw.price; sA += oAway.price; n++;
+    }
+    if (n === 0) continue;
+
+    const probs = normaliserCotes(sH / n, sD / n, sA / n);
+
+    // Vérifier l'orientation (home/away peut être inversé par rapport à e1/e2)
+    if (m.e1 === nom1FR) {
+      nouveau[m.id] = probs;
+    } else {
+      nouveau[m.id] = { win: probs.loss, draw: probs.draw, loss: probs.win };
+    }
+  }
+
+  cotesParMatch = nouveau;
+  return Object.keys(nouveau).length > 0;
+}
+
+/**
+ * Charge les cotes depuis /api/odds (serverless Vercel).
+ * Silencieux en cas d'erreur — le site fonctionne en mode modèle seul.
+ * N'est pas appelé sur file:// (pas de serverless en local).
+ */
+async function chargerCotes() {
+  // Pas de serverless disponible en local (file://)
+  if (window.location.protocol === 'file:') return;
+
+  try {
+    const resp = await fetch('/api/odds', {
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!resp.ok) return;  // Échec silencieux
+
+    const data = await resp.json();
+    if (!Array.isArray(data)) return;
+
+    const changed = traiterCotes(data);
+    cotesTs = new Date();
+
+    if (changed) {
+      // Les cotes ont été mises à jour → invalider le cache et relancer la simulation
+      invaliderCacheSim();
+      lancerSimulation();
+    }
+  } catch (_) {
+    // Timeout, réseau indisponible, quota dépassé → mode modèle seul sans message
+  }
+}
+
+/**
+ * Ajuste λ₁ et λ₂ par binary search pour que P(victoire équipe 1)
+ * dans le modèle Double Poisson corresponde à targetWin.
+ * La somme λ₁+λ₂ est conservée (seul le ratio change).
+ */
+function calibrerLambdas(lam1, lam2, targetWin) {
+  const total = lam1 + lam2;
+  if (total <= 0 || targetWin <= 0 || targetWin >= 1) return { lam1, lam2 };
+
+  let lo = 0.05, hi = 0.95;  // part de l'équipe 1 dans les buts totaux
+
+  for (let i = 0; i < 40; i++) {
+    const mid = (lo + hi) / 2;
+    const l1  = total * mid;
+    const l2  = total * (1 - mid);
+    const pr  = predictMatch(l1, l2);
+    if (pr.pWin < targetWin) lo = mid; else hi = mid;
+  }
+
+  const share = (lo + hi) / 2;
+  return {
+    lam1: Math.min(4.5, Math.max(0.2, total * share)),
+    lam2: Math.min(4.5, Math.max(0.2, total * (1 - share))),
+  };
+}
+
+/**
+ * Retourne les λ calibrés pour un match (avec fusion bookmakers si disponibles).
+ * Fusion : 60 % bookmakers + 40 % modèle → ajuste les λ en conséquence.
+ */
+function getCalibratedLambdas(m) {
+  const { hf1, hf2, enjeu } = getContextFactors(m);
+  const ad1 = attackDef[m.e1] ?? { att: 1, def: 1 };
+  const ad2 = attackDef[m.e2] ?? { att: 1, def: 1 };
+
+  let lam1 = Math.min(4.5, Math.max(0.2, ad1.att * ad2.def * MU_GOALS * hf1 * enjeu));
+  let lam2 = Math.min(4.5, Math.max(0.2, ad2.att * ad1.def * MU_GOALS * hf2 * enjeu));
+
+  const bk = cotesParMatch[m.id];
+  if (!bk) return { lam1, lam2, source: 'model' };
+
+  // Probabilités brutes du modèle (sans calibration)
+  const prModel = predictMatch(lam1, lam2);
+
+  // Fusion 60 % bookmakers / 40 % modèle
+  const A   = 0.6;
+  const fusWin  = A * bk.win  + (1 - A) * prModel.pWin;
+  const fusDraw = A * bk.draw + (1 - A) * prModel.pDraw;  // (info uniquement)
+  const fusLoss = A * bk.loss + (1 - A) * prModel.pLoss;
+
+  // Ajuster les λ pour que P(victoire) ≈ fusWin
+  const calibrated = calibrerLambdas(lam1, lam2, fusWin);
+
+  return {
+    lam1:  calibrated.lam1,
+    lam2:  calibrated.lam2,
+    source: 'bookmakers',
+    fusWin, fusDraw, fusLoss,
+  };
+}
+
+/**
+ * Pré-calcule les λ calibrés pour tous les matchs non encore joués.
+ * Passé au Worker pour que la simulation Monte Carlo utilise les cotes.
+ */
+function preparerCalibLambdas() {
+  const cal = {};
+  for (const m of MATCHS_GROUPES) {
+    if (!resultats[m.id]) {
+      const { lam1, lam2 } = getCalibratedLambdas(m);
+      cal[m.id] = { lam1, lam2 };
+    }
+  }
+  return cal;
 }
 
 // ════════════════════════════════════════════════════════════════════
@@ -2189,7 +2482,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   init();
   afficherMatchsDuJour();
-  lancerSimulation();
+  lancerSimulation();         // affichage immédiat (cache ou simulation auto)
+  chargerCotes();             // chargement async des cotes en arrière-plan
+                              // → relancera la simulation si des cotes sont trouvées
 });
 </script>
 </body>
